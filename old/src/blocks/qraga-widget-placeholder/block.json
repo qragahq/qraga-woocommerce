@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "qraga/widget-placeholder",
+	"title": "Qraga Widget Placeholder",
+	"category": "woocommerce",
+	"description": "Designates the position for the Qraga product page widget.",
+	"icon": "cloud-upload",
+	"keywords": [ "qraga", "widget", "product" ],
+	"version": "0.1.0",
+	"textdomain": "qraga",
+	"editorScript": "file:./index.js",
+	"supports": {
+		"html": false,
+		"align": false
+	}
+} 
