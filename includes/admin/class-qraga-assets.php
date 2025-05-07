@@ -29,7 +29,7 @@ class Qraga_Assets // Renamed class
 		if ($screenID === "toplevel_page_qraga") {
 			$apiNonce = wp_create_nonce('wp_rest');
 			// Using renamed QRAGA_ constants
-			$root = rest_url(QRAGA_REST_API_ROUTE . '/'); 
+			$root = rest_url();
 			$baseUrl = QRAGA_URL; 
 
 			// Check for development mode using QRAGA_DEV

@@ -16,69 +16,46 @@
 
 defined('ABSPATH') || exit;
 
-final class Qraga_Plugin
-{
-    private static $instance;
-
-    private $version = '0.1.0';
-
-    private function __construct()
-    {
-        $this->define_constants();
-        $this->includes();
-    }
-
-    private function includes()
-    {
-        if (is_admin()) {
-            require_once(QRAGA_ABSPATH . 'includes/admin/class-qraga-menu.php');
-            require_once(QRAGA_ABSPATH . 'includes/admin/class-qraga-assets.php');
-        }
-        require_once(QRAGA_ABSPATH . 'includes/admin/class-qraga-api.php');
-    }
-    /**
-     * Define Plugin Constants.
-     * @since 0.1.0
-     */
-    private function define_constants()
-    {
-        $this->define('QRAGA_DEV', false);
-        $this->define('QRAGA_REST_API_ROUTE', 'qraga/v1');
-        $this->define('QRAGA_URL', plugin_dir_url(__FILE__));
-        $this->define('QRAGA_ABSPATH', dirname(__FILE__) . '/');
-        $this->define('QRAGA_VERSION', $this->get_version());
-    }
-
-    /**
-     * Returns Plugin version for global
-     * @since  0.1.0
-     */
-    private function get_version()
-    {
-        return $this->version;
-    }
-
-    /**
-     * Define constant if not already set.
-     *
-     * @since  0.1.0
-     * @param  string $name
-     * @param  string|bool $value
-     */
-    private function define($name, $value)
-    {
-        if (!defined($name)) {
-            define($name, $value);
-        }
-    }
-
-    public static function get_instance()
-    {
-        if (null === self::$instance) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
+// Define plugin file constant
+if ( ! defined( 'QRAGA_PLUGIN_FILE' ) ) {
+	define( 'QRAGA_PLUGIN_FILE', __FILE__ );
 }
 
-Qraga_Plugin::get_instance();
+/**
+ * Check if WooCommerce is active.
+ */
+function qraga_is_woocommerce_active() {
+    return class_exists( 'WooCommerce' );
+}
+
+/**
+ * Display admin notice if WooCommerce is not active.
+ */
+function qraga_woocommerce_missing_notice() {
+    ?>
+    <div class="error">
+        <p><?php esc_html_e( 'Qraga requires WooCommerce to be installed and activated. Please install or activate WooCommerce.', 'qraga' ); ?></p>
+    </div>
+    <?php
+}
+
+/**
+ * Initialize the plugin core components only if WooCommerce is active.
+ */
+function qraga_initialize_plugin() {
+    // Check for WooCommerce
+    if ( ! qraga_is_woocommerce_active() ) {
+        add_action( 'admin_notices', 'qraga_woocommerce_missing_notice' );
+        return; // Stop initialization if WooCommerce is missing
+    }
+
+    // Load text domain
+    load_plugin_textdomain( 'qraga', false, dirname( plugin_basename( QRAGA_PLUGIN_FILE ) ) . '/languages' );
+
+    // Proceed with loading the main plugin class
+    require_once dirname( QRAGA_PLUGIN_FILE ) . '/includes/class-qraga-plugin.php'; // We should probably rename the class file too
+    Qraga_Plugin::instance(); // Ensure class name matches the file/class being loaded
+}
+
+// Hook into plugins_loaded to initialize
+add_action( 'plugins_loaded', 'qraga_initialize_plugin' );
