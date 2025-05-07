@@ -2,8 +2,8 @@
 
 /**
  * Plugin Name: Qraga
- * Description: Example description of this plugin.
- * Version: 1.0.0
+ * Description: WooCommerce extension for Qraga integration.
+ * Version: 0.1.0
  * Author: Your Name
  * Author URI: https://yoursite.com
  * Text Domain: qraga
@@ -16,11 +16,11 @@
 
 defined('ABSPATH') || exit;
 
-final class Qraga
+final class Qraga_Plugin
 {
     private static $instance;
 
-    private $version = '1.0.0';
+    private $version = '0.1.0';
 
     private function __construct()
     {
@@ -31,27 +31,27 @@ final class Qraga
     private function includes()
     {
         if (is_admin()) {
-            require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-qraga-admin-panel-menu.php');
-            require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-qraga-admin-panel-assets.php');
+            require_once(QRAGA_ABSPATH . 'includes/admin/class-qraga-menu.php');
+            require_once(QRAGA_ABSPATH . 'includes/admin/class-qraga-assets.php');
         }
-        require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-qraga-admin-panel-api.php');
+        require_once(QRAGA_ABSPATH . 'includes/admin/class-qraga-api.php');
     }
     /**
      * Define Plugin Constants.
-     * @since 1.0
+     * @since 0.1.0
      */
     private function define_constants()
     {
-        $this->define('PLUGIN_NAME_DEV', false);
-        $this->define('PLUGIN_NAME_REST_API_ROUTE', 'plugin-name/v1');
-        $this->define('PLUGIN_NAME_URL', plugin_dir_url(__FILE__));
-        $this->define('PLUGIN_NAME_ABSPATH', dirname(__FILE__) . '/');
-        $this->define('PLUGIN_NAME_VERSION', $this->get_version());
+        $this->define('QRAGA_DEV', false);
+        $this->define('QRAGA_REST_API_ROUTE', 'qraga/v1');
+        $this->define('QRAGA_URL', plugin_dir_url(__FILE__));
+        $this->define('QRAGA_ABSPATH', dirname(__FILE__) . '/');
+        $this->define('QRAGA_VERSION', $this->get_version());
     }
 
     /**
      * Returns Plugin version for global
-     * @since  1.0
+     * @since  0.1.0
      */
     private function get_version()
     {
@@ -61,7 +61,7 @@ final class Qraga
     /**
      * Define constant if not already set.
      *
-     * @since  1.0
+     * @since  0.1.0
      * @param  string $name
      * @param  string|bool $value
      */
@@ -81,4 +81,4 @@ final class Qraga
     }
 }
 
-Qraga::get_instance();
+Qraga_Plugin::get_instance();
