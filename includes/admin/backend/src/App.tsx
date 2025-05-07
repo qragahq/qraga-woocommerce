@@ -8,7 +8,7 @@ import Posts from './views/Posts/Posts';
 import Users from './views/Users/Users';
 
 export enum Pages {
-	Posts = 'Posts',
+	Posts = 'Overview',
 	Users = 'Users',
 	Settings = 'Settings',
 	SettingsGeneral = 'SettingsGeneral',

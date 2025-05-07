@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Plugin Name: WPGens WordPress React Admin Panel
+ * Plugin Name: Qraga
  * Description: Example description of this plugin.
  * Version: 1.0.0
  * Author: Your Name
  * Author URI: https://yoursite.com
- * Text Domain: plugin-name
+ * Text Domain: qraga
  * Domain Path: /languages
  * Requires at least: 5.9
  * Tested up to: 6.1
@@ -16,7 +16,7 @@
 
 defined('ABSPATH') || exit;
 
-final class WP_React_Admin_Panel
+final class Qraga
 {
     private static $instance;
 
@@ -31,10 +31,10 @@ final class WP_React_Admin_Panel
     private function includes()
     {
         if (is_admin()) {
-            require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-wp-react-admin-panel-menu.php');
-            require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-wp-react-admin-panel-assets.php');
+            require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-qraga-admin-panel-menu.php');
+            require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-qraga-admin-panel-assets.php');
         }
-        require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-wp-react-admin-panel-api.php');
+        require_once(PLUGIN_NAME_ABSPATH . 'includes/admin/class-qraga-admin-panel-api.php');
     }
     /**
      * Define Plugin Constants.
@@ -81,4 +81,4 @@ final class WP_React_Admin_Panel
     }
 }
 
-WP_React_Admin_Panel::get_instance();
+Qraga::get_instance();

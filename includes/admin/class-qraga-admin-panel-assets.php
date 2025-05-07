@@ -8,7 +8,7 @@
 
 defined('ABSPATH') || exit;
 
-class WP_React_Admin_Panel_Assets
+class Qraga_Admin_Panel_Assets
 {
 	public function __construct()
 	{
@@ -65,4 +65,4 @@ class WP_React_Admin_Panel_Assets
 	}
 }
 
-new WP_React_Admin_Panel_Assets();
+new Qraga_Admin_Panel_Assets();

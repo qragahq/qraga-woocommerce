@@ -8,7 +8,7 @@
 
 defined('ABSPATH') || exit;
 
-class WP_React_Admin_Panel_API
+class Qraga_Admin_Panel_API
 {
 
     /**
@@ -197,4 +197,4 @@ class WP_React_Admin_Panel_API
     }
 }
 
-WP_React_Admin_Panel_API::instance();
+Qraga_Admin_Panel_API::instance();

@@ -8,7 +8,7 @@
 
 defined('ABSPATH') || exit;
 
-class WP_React_Admin_Panel_Menu
+class Qraga_Admin_Panel_Menu
 {
 
 	public function __construct()
@@ -16,8 +16,8 @@ class WP_React_Admin_Panel_Menu
 		// Add submenu items
 		add_action('admin_menu', array($this, 'register_menu'));
 		// Add links under plugin page.
-		add_filter('plugin_action_links_wp-react-admin-panel/wp-react-admin-panel.php', array($this, 'add_settings_link'));
-		add_filter('plugin_action_links_wp-react-admin-panel/wp-react-admin-panel.php', array($this, 'docs_link'));
+		add_filter('plugin_action_links_qraga/qraga.php', array($this, 'add_settings_link'));
+		add_filter('plugin_action_links_qraga/qraga.php', array($this, 'docs_link'));
 	}
 
 
@@ -28,7 +28,7 @@ class WP_React_Admin_Panel_Menu
 	 */
 	public function register_menu()
 	{
-		add_menu_page(__('WP Admin Panel', 'plugin-name'), __('WP Admin Panel', 'plugin-name'), 'manage_options', 'plugin-name', array($this, 'display_react_admin_page'), 'dashicons-menu');
+		add_menu_page(__('Qraga', 'plugin-name'), __('Qraga', 'plugin-name'), 'manage_options', 'plugin-name', array($this, 'display_react_admin_page'), 'dashicons-menu');
 	}
 
 	/**
@@ -69,4 +69,4 @@ class WP_React_Admin_Panel_Menu
 	}
 }
 
-new WP_React_Admin_Panel_Menu();
+new Qraga_Admin_Panel_Menu();
