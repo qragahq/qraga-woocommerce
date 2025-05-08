@@ -263,6 +263,72 @@ class Qraga_Product_Sync {
     // --- End of Ported/Adapted Methods ---
 
     /**
+     * Constructs the API URL for bulk product operations.
+     */
+    private function get_bulk_products_api_url(): ?string {
+        $base_url = get_option('qraga_endpoint_url');
+        $site_id = get_option('qraga_site_id');
+
+        if (empty($base_url) || empty($site_id)) {
+            error_log('Qraga Error: Endpoint URL or Site ID is not configured for bulk products API URL.');
+            return null;
+        }
+        
+        // Example: v1/site/{site_id}/products/bulk - Adjust if Qraga API has a different bulk endpoint
+        return trailingslashit($base_url) . 'v1/site/' . rawurlencode($site_id) . '/products/bulk'; 
+    }
+
+    /**
+     * Sends a batch of products to the Qraga API as NDJSON.
+     *
+     * @param array $products_payload Array of product data arrays (output from transform_product_data).
+     * @return array Result from handle_api_response.
+     */
+    public function send_ndjson_batch(array $products_payload): array {
+        if (empty($products_payload)) {
+            return ['success' => true, 'message' => 'No products in batch to send.', 'product_ids' => []];
+        }
+
+        $api_url = $this->get_bulk_products_api_url();
+        if (!$api_url) {
+            error_log('Qraga Bulk Sync Error: Could not determine API URL for bulk send.');
+            return ['success' => false, 'message' => 'Could not determine API URL for bulk send.'];
+        }
+
+        $args = $this->get_api_request_args('POST', 'application/x-ndjson');
+        if (is_string($args)) { // Error message from get_api_request_args if config incomplete
+            error_log("Qraga Bulk Sync Error: {$args}");
+            return ['success' => false, 'message' => $args];
+        }
+
+        $ndjson_body = '';
+        foreach ($products_payload as $product_data) {
+            $json_line = wp_json_encode($product_data);
+            if ($json_line === false) {
+                error_log("Qraga Bulk Sync Error: Failed to JSON encode a product for NDJSON. Product ID (if available): " . ($product_data['id'] ?? 'N/A'));
+                // Decide: skip this product or fail the batch?
+                // For now, let's try to continue with other products, but log it.
+                continue; 
+            }
+            $ndjson_body .= $json_line . "\n";
+        }
+
+        if (empty(trim($ndjson_body))) {
+            error_log("Qraga Bulk Sync Error: NDJSON body is empty after processing products.");
+            return ['success' => false, 'message' => 'Failed to prepare any product for NDJSON body.'];
+        }
+
+        $args['body'] = trim($ndjson_body); // Trim trailing newline
+
+        error_log("Qraga Bulk Sync: Attempting POST to bulk endpoint: {$api_url} with " . count($products_payload) . " products.");
+        // For debugging, do not log the entire body in production if it's too large
+        // error_log("NDJSON Body: " . $args['body']); 
+
+        $response = wp_remote_request($api_url, $args);
+        return $this->handle_api_response($response, $api_url);
+    }
+
+    /**
      * Public facing method for handling product save/update events.
      * Determines whether to sync (create/update) or delete the product in Qraga based on publish status.
      * Called by the save hook.
