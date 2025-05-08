@@ -29,7 +29,7 @@ class Qraga_Product_Sync {
         }
 
         $product_data = [
-            'id'          => 'prod-wc-' . $product->get_id(),
+            'id'          => (string) $product->get_id(),
             'title'       => $product->get_name(),
             'description' => $product->get_description() ?: $product->get_short_description(),
             'categories'  => $this->get_term_names( $product->get_category_ids(), 'product_cat' ),
@@ -74,7 +74,7 @@ class Qraga_Product_Sync {
         $variation_features = $this->get_variation_features( $variation );
 
         return [
-            'id'                 => 'var-wc-' . $variation->get_id(),
+            'id'                 => (string) $variation->get_id(),
             'title'              => $variation_title,
             'price'              => [
                 'amount'   => (int) round( (float) $variation->get_price() * 100 ),
@@ -96,7 +96,7 @@ class Qraga_Product_Sync {
         $product_features = $this->get_product_features( $product, true );
 
         return [
-            'id'                 => 'var-wc-' . $product->get_id() . '-simple',
+            'id'                 => (string) $product->get_id(),
             'title'              => $product->get_name(),
             'price'              => [
                 'amount'   => (int) round( (float) $product->get_price() * 100 ),
@@ -355,7 +355,7 @@ class Qraga_Product_Sync {
             error_log("Qraga Sync: Product {$product_id} is published. Processing sync (Create/Update).");
 
             $transformed_data = $this->transform_product_data( $product );
-            $product_identifier = 'prod-wc-' . $product_id;
+            $product_identifier_for_api = (string) $product_id;
 
             if ( empty( $transformed_data ) ) {
                 error_log('Qraga Product Sync: Failed to transform product ID ' . $product_id);
@@ -364,7 +364,7 @@ class Qraga_Product_Sync {
 
             $method = $was_synced ? 'PUT' : 'POST';
             
-            $api_url = $this->get_single_product_api_url($method, ($method === 'PUT' ? $product_identifier : null) );
+            $api_url = $this->get_single_product_api_url($method, ($method === 'PUT' ? $product_identifier_for_api : null) );
             if (!$api_url) {
                  error_log("Qraga Sync Error (Save): Could not determine API URL for product {$product_id}, method {$method}.");
                  return ['success' => false, 'message' => 'Could not determine API URL.', 'product_id' => $product_id];
@@ -372,13 +372,13 @@ class Qraga_Product_Sync {
 
             $args = $this->get_api_request_args( $method );
             if (is_string($args)) { // Error message returned if config incomplete
-                error_log("Qraga Product Sync Error for {$product_identifier}: {$args}");
+                error_log("Qraga Product Sync Error for product {$product_id}: {$args}");
                 return ['success' => false, 'message' => $args, 'product_id' => $product_id];
             }
 
             $args['body'] = wp_json_encode( $transformed_data );
             if ($args['body'] === false) {
-                error_log("QragaService: Failed to JSON encode single product data for {$product_identifier}.");
+                error_log("QragaService: Failed to JSON encode single product data for product {$product_id}.");
                 return ['success' => false, 'message' => 'Failed to encode product data to JSON.', 'product_id' => $product_id];
             }
             
@@ -388,10 +388,10 @@ class Qraga_Product_Sync {
 
             if ( $result['success'] ) {
                 update_post_meta( $product_id, self::SYNC_META_KEY, time() );
-                error_log('Qraga Product Sync Success (' . ( $was_synced ? 'Update' : 'Create' ) . '): ' . $product_identifier);
+                error_log('Qraga Product Sync Success (' . ( $was_synced ? 'Update' : 'Create' ) . '): Product ID ' . $product_id);
             } else {
                 // Logged already in handle_api_response
-                // error_log('Qraga Product Sync Failed (' . ( $was_synced ? 'Update' : 'Create' ) . '): ' . $product_identifier . ' - Error: ' . $result['message']);
+                // error_log('Qraga Product Sync Failed (' . ( $was_synced ? 'Update' : 'Create' ) . '): Product ID ' . $product_id . ' - Error: ' . $result['message']);
             }
             return array_merge($result, ['product_id' => $product_id]);
 
@@ -427,8 +427,8 @@ class Qraga_Product_Sync {
         // $product = wc_get_product( $product_id );
         // if ( $product && !$this->is_syncable_product_type($product) ) { ... }
 
-        $product_identifier = 'prod-wc-' . $product_id;
-        $api_url = $this->get_single_product_api_url('DELETE', $product_identifier);
+        $product_identifier_for_api = (string) $product_id;
+        $api_url = $this->get_single_product_api_url('DELETE', $product_identifier_for_api);
 
         if (!$api_url) {
             return ['success' => false, 'message' => 'Could not determine API URL for delete.', 'product_id' => $product_id];
@@ -436,7 +436,7 @@ class Qraga_Product_Sync {
 
         $args = $this->get_api_request_args('DELETE');
         if (is_string($args)) { // Error message returned
-            error_log("Qraga Delete Error for {$product_identifier}: {$args}");
+            error_log("Qraga Delete Error for product {$product_id}: {$args}");
             return ['success' => false, 'message' => $args, 'product_id' => $product_id];
         }
 
@@ -446,11 +446,11 @@ class Qraga_Product_Sync {
 
         if ( $result['success'] || (isset($result['response_code']) && $result['response_code'] === 404) ) {
             delete_post_meta( $product_id, self::SYNC_META_KEY );
-            error_log("Qraga Delete Success for {$product_identifier}. Response Code: " . ($result['response_code'] ?? 'N/A'));
+            error_log("Qraga Delete Success for product {$product_id}. Response Code: " . ($result['response_code'] ?? 'N/A'));
             // Ensure success is true if it was a 404, as that means it's gone from Qraga
             $result['success'] = true; 
         } else {
-            error_log( "Qraga Delete Failed for {$product_identifier}. Error: " . $result['message'] );
+            error_log( "Qraga Delete Failed for product {$product_id}. Error: " . $result['message'] );
         }
         return array_merge($result, ['product_id' => $product_id]);
     }
@@ -475,40 +475,11 @@ class Qraga_Product_Sync {
         }
     }
     
-    // --- Original methods from new class (is_syncable_product_type, generate_widget_code) ---
+    /** 
+     * Checks if the current product is syncable.
+     */
     private function is_syncable_product_type( $product ) {
         // This is from the new code, seems reasonable to keep.
         return $product->is_type( array( 'simple', 'variable' ) );
-    }
-
-    public function generate_widget_code(array $atts = []): string {
-        $widget_id = get_option('qraga_widget_id');
-        $site_id = get_option('qraga_site_id');
-        if (empty($widget_id) || empty($site_id)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                return '<!-- Qraga Widget: site_id or widget_id not configured -->';
-            }
-            return '';
-        }
-        $product_id = null;
-        if (!empty($atts['product_id'])) {
-            $product_id = intval($atts['product_id']);
-        } elseif (is_singular('product') && ($global_post = get_post())) {
-            $product_id = $global_post->ID;
-        } elseif (function_exists('get_queried_object_id') && get_queried_object_id() && is_product()){
-            $product_id = get_queried_object_id();
-        }
-        $widget_url = sprintf(
-            'https://qraga.com/widgets/%s/qraga.js?siteId=%s',
-            rawurlencode($widget_id),
-            rawurlencode($site_id)
-        );
-        $html = '<div id="qraga-widget-container" class="qraga-widget">';
-        if ($product_id) {
-            $html .= '<qraga-product-widget product-id="' . esc_attr((string)$product_id) . '"></qraga-product-widget>';
-        }
-        $html .= '</div>';
-        $html .= '<script type="text/javascript" src="' . esc_url($widget_url) . '" async></script>';
-        return $html;
     }
 }

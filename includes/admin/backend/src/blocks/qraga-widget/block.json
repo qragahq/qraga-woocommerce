@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "qraga/product-widget",
+    "title": "Qraga Product Widget",
+    "category": "woocommerce",
+    "description": "Displays the Qraga interactive widget for the current product.",
+    "keywords": [ "qraga", "product", "widget", "recommendations" ],
+    "icon": "store",
+    "attributes": {
+        "productId": {
+            "type": "number"
+        }
+    },
+    "supports": {
+        "html": false,
+        "align": ["wide", "full"]
+    },
+    "textdomain": "qraga",
+    "editorScript": "file:./index.js",
+    "editorStyle": "file:./index.css",
+    "style": "file:./style.css",
+    "render": "Qraga_Widget_Display::render_widget_block"
+} 
