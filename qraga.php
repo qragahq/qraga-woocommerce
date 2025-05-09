@@ -39,17 +39,15 @@ add_action(
  * to ensure WooCommerce and other dependencies are available.
  */
 function qraga_initialize_plugin() {
-	// Check if WooCommerce is active
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		add_action( 'admin_notices', 'qraga_missing_woocommerce_notice' );
 		return;
 	}
 
-	// Load text domain
 	load_plugin_textdomain( 'qraga', false, dirname( plugin_basename( QRAGA_PLUGIN_FILE ) ) . '/languages' );
 
 	require_once dirname( QRAGA_PLUGIN_FILE ) . '/includes/class-qraga-plugin.php';
-	Qraga_Plugin::instance(); // Initialize the plugin
+	Qraga_Plugin::instance();
 }
 
 /**

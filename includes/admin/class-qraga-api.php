@@ -22,26 +22,22 @@ class Qraga_Api // Renamed class
 
     public function __construct()
     {
-        // error_log('Qraga_Api constructor called.'); // REMOVE THIS DEBUG LOG
         add_action('rest_api_init', function () {
-            // error_log('Qraga_Api rest_api_init callback fired.'); // REMOVE THIS DEBUG LOG
             // Settings endpoints - using QRAGA_REST_API_ROUTE
             register_rest_route(QRAGA_REST_API_ROUTE, '/settings/', array(
-                // Get settings
                 array(
                     'methods'             => WP_REST_Server::READABLE,
                     'callback'            => array($this, 'get_settings'),
                     'permission_callback' => array($this, 'get_permission'),
                     'args'                => array(),
                 ),
-                // Save settings
                 array(
-                    'methods'             => WP_REST_Server::CREATABLE, // Use POST
+                    'methods'             => WP_REST_Server::CREATABLE,
                     'callback'            => array($this, 'set_settings'),
                     'permission_callback' => array($this, 'get_permission'),
-                    'args'                => $this->get_settings_endpoint_args(), // Use args definition
+                    'args'                => $this->get_settings_endpoint_args(),
                 ),
-                 'schema' => array($this, 'get_public_item_schema'), // Add schema
+                 'schema' => array($this, 'get_public_item_schema'),
             ));
 
             // Example: License Endpoint - using QRAGA_REST_API_ROUTE 
@@ -54,7 +50,7 @@ class Qraga_Api // Renamed class
             // Bulk Sync Trigger Endpoint
             register_rest_route(QRAGA_REST_API_ROUTE, '/export/', array( 
                 'methods'             => WP_REST_Server::CREATABLE, 
-                'callback'            => array($this, 'handle_bulk_export_trigger'), // Renamed callback
+                'callback'            => array($this, 'handle_bulk_export_trigger'),
                 'permission_callback' => array($this, 'get_permission')
             ));
 
@@ -69,7 +65,6 @@ class Qraga_Api // Renamed class
                         'type'        => 'string',
                         'required'    => true,
                         'validate_callback' => function($param, $request, $key) {
-                            // Basic validation for job ID format
                             return is_string($param) && preg_match('/^[a-zA-Z0-9_.-]+$/', $param);
                         }
                     ]
@@ -105,10 +100,10 @@ class Qraga_Api // Renamed class
     {
         $prefix = 'qraga_'; 
         $options = array(
-            $prefix . 'site_id',       // Was qraga_site_id in old code
-            $prefix . 'api_key',       // Was qraga_api_key
-            $prefix . 'endpoint_url',  // Was qraga_endpoint_url
-            $prefix . 'widget_id',     // Was qraga_widget_id
+            $prefix . 'site_id',       
+            $prefix . 'api_key',       
+            $prefix . 'endpoint_url',  
+            $prefix . 'widget_id',     
             // Removed shop_id and endpoint_region
         );
         return $options;
@@ -139,8 +134,6 @@ class Qraga_Api // Renamed class
             $updated = true;
         }
         if ( isset( $params['apiKey'] ) ) {
-             // Avoid saving empty string if key is cleared and wasn't sent? Or allow clearing?
-             // Old code updated if !is_null. Let's stick to that for now.
             update_option( 'qraga_api_key', sanitize_text_field( $params['apiKey'] ) );
             $updated = true;
         }
@@ -186,7 +179,7 @@ class Qraga_Api // Renamed class
             'description'       => esc_html__( 'The unique site identifier.', 'qraga' ),
             'type'              => 'string',
             'required'          => false,
-            'validate_callback' => function($param, $request, $key) { return is_string($param); }, // Basic validation
+            'validate_callback' => function($param, $request, $key) { return is_string($param); },
             'sanitize_callback' => 'sanitize_text_field',
         ];
         $args['apiKey'] = [
@@ -279,9 +272,7 @@ class Qraga_Api // Renamed class
                 ],
             ],
         ];
-        // If using WP_REST_Controller base class, add_additional_fields_schema might be available
-        // return $this->add_additional_fields_schema( $schema );
-        return $schema; // Return schema directly if not extending WP_REST_Controller
+        return $this->add_additional_fields_schema( $schema );
     }
 
     /**
@@ -293,38 +284,33 @@ class Qraga_Api // Renamed class
      */
     public function handle_bulk_export_trigger( WP_REST_Request $request )
     {
-        // 0. Check for an existing active job
         $active_job_id = get_option(self::ACTIVE_JOB_ID_OPTION);
         if ($active_job_id) {
             $active_job_transient_key = 'qraga_job_' . $active_job_id;
             $active_job_status = get_transient($active_job_transient_key);
 
             if ($active_job_status && isset($active_job_status['status'])) {
-                $allowed_active_statuses = ['queued', 'processing', 'error_scheduling_next']; // Statuses considered "still active"
+                $allowed_active_statuses = ['queued', 'processing', 'error_scheduling_next'];
                 if (in_array($active_job_status['status'], $allowed_active_statuses, true)) {
-                    error_log("Qraga Bulk Export Trigger: Found active job {$active_job_id} with status {$active_job_status['status']}. Returning its status.");
-                    // Return the details of the existing job
+                    // error_log("Qraga Bulk Export Trigger: Found active job {$active_job_id} with status {$active_job_status['status']}. Returning its status.");
                     return new WP_REST_Response( [
-                        'status'          => 'active_job_found', // Custom status for frontend to recognize
+                        'status'          => 'active_job_found',
                         'message'         => sprintf(esc_html__( 'An existing sync job (ID: %s) is currently %s.', 'qraga' ), $active_job_id, $active_job_status['status']),
                         'job_id'          => $active_job_id,
-                        'job_details'     => $active_job_status // Send full current details of the active job
-                    ], 200 ); // 200 OK, but with a specific payload
+                        'job_details'     => $active_job_status
+                    ], 200 );
                 } else {
-                    // Job is completed, failed, or transient expired but option still exists - clear option and proceed
-                    error_log("Qraga Bulk Export Trigger: Found stale active job ID {$active_job_id} (status: {$active_job_status['status']}). Clearing option and proceeding.");
+                    // error_log("Qraga Bulk Export Trigger: Found stale active job ID {$active_job_id} (status: {$active_job_status['status']}). Clearing option and proceeding.");
                     delete_option(self::ACTIVE_JOB_ID_OPTION);
                 }
             } else {
-                // Option exists but transient is gone (expired or deleted) - clear option and proceed
-                error_log("Qraga Bulk Export Trigger: Found active job ID {$active_job_id} but its transient is missing. Clearing option and proceeding.");
+                // error_log("Qraga Bulk Export Trigger: Found active job ID {$active_job_id} but its transient is missing. Clearing option and proceeding.");
                 delete_option(self::ACTIVE_JOB_ID_OPTION);
             }
         }
 
-        // 1. Check if Action Scheduler is available
         if ( ! function_exists('as_schedule_single_action') ) {
-            error_log('Qraga Error: Action Scheduler function as_schedule_single_action() not found. Is Action Scheduler active?');
+            // error_log('Qraga Error: Action Scheduler function as_schedule_single_action() not found. Is Action Scheduler active?');
             return new WP_Error(
                 'action_scheduler_missing',
                 esc_html__( 'Required background processing library (Action Scheduler) is not available.', 'qraga' ),
@@ -332,7 +318,6 @@ class Qraga_Api // Renamed class
             );
         }
 
-        // 2. Check essential API settings (copied from previous version)
         $site_id = get_option( 'qraga_site_id', '' );
         $api_key = get_option( 'qraga_api_key', '' );
         $endpoint_url_base = get_option( 'qraga_endpoint_url', '' );
@@ -340,7 +325,6 @@ class Qraga_Api // Renamed class
             return new WP_Error('qraga_missing_config_for_export', esc_html__( 'Site ID, API Key, and Endpoint URL must be configured in Settings before starting sync.', 'qraga' ), [ 'status' => 400 ] );
         }
 
-        // 3. Count total products to sync (for frontend feedback)
         $query_args = [
             'status'   => 'publish',
             'limit'    => -1, // Count all
@@ -351,13 +335,12 @@ class Qraga_Api // Renamed class
 
         if ($total_products === 0) {
              return new WP_REST_Response( [
-                'status'   => 'complete', // Or 'no_products'
+                'status'   => 'complete',
                 'message' => 'No products found to sync.',
                 'total_products' => 0
             ], 200 );
         }
 
-        // 4. Generate Job ID and Initial Status
         $job_id = 'qraga_export_' . uniqid();
         $initial_status = [
             'job_id'         => $job_id,
@@ -370,24 +353,21 @@ class Qraga_Api // Renamed class
             'error_ids'      => []
         ];
 
-        // 5. Store initial status using a transient (expires in e.g., 1 day)
         set_transient('qraga_job_' . $job_id, $initial_status, DAY_IN_SECONDS);
 
-        // 6. Schedule the first batch (page 1)
         $action_id = as_schedule_single_action(
-            time(), // Schedule to run ASAP
+            time(),
             self::BATCH_PROCESS_HOOK, 
             [
                 'job_id' => $job_id,
                 'page'   => 1
             ],
-            'qraga_bulk_export' // Action group name
+            'qraga_bulk_export'
         );
 
         if ($action_id === 0) {
-            // Scheduling failed
-            error_log("Qraga Error: Failed to schedule first batch using Action Scheduler for Job ID: {$job_id}");
-             delete_transient('qraga_job_' . $job_id); // Clean up transient
+            // error_log("Qraga Error: Failed to schedule first batch using Action Scheduler for Job ID: {$job_id}");
+             delete_transient('qraga_job_' . $job_id);
             return new WP_Error(
                 'scheduler_failed',
                 esc_html__( 'Failed to schedule the background synchronization task.', 'qraga' ),
@@ -395,11 +375,9 @@ class Qraga_Api // Renamed class
             );
         }
         
-        // If scheduling was successful, NOW update the active job ID option
         update_option(self::ACTIVE_JOB_ID_OPTION, $job_id);
-        error_log("Qraga Bulk Export: Queued Job ID {$job_id} with Action ID {$action_id} for {$total_products} products. Set as active job.");
+        // error_log("Qraga Bulk Export: Queued Job ID {$job_id} with Action ID {$action_id} for {$total_products} products. Set as active job.");
 
-        // 7. Return success response to frontend
         return new WP_REST_Response( [
             'status'   => 'queued',
             'message' => 'Bulk synchronization job queued successfully.',
@@ -415,19 +393,19 @@ class Qraga_Api // Renamed class
      * @param int $page The batch number (page number) to process.
      */
     public function process_sync_batch(string $job_id, int $page) {
-        error_log("Qraga Action Scheduler: Starting processing batch {$page} for Job ID: {$job_id}");
+        // error_log("Qraga Action Scheduler: Starting processing batch {$page} for Job ID: {$job_id}");
 
         $transient_key = 'qraga_job_' . $job_id;
         $job_status = get_transient($transient_key);
 
         if ($job_status === false) {
-            error_log("Qraga Action Scheduler Error: Job ID {$job_id} not found in transients. Aborting batch {$page}.");
+            // error_log("Qraga Action Scheduler Error: Job ID {$job_id} not found in transients. Aborting batch {$page}.");
             return; // Or throw an exception if Action Scheduler should retry
         }
 
         // Ensure Qraga_Product_Sync class is available and instantiated
         if (!class_exists('Qraga_Product_Sync')) {
-            error_log("Qraga Action Scheduler Error: Qraga_Product_Sync class not found. Job ID: {$job_id}, Batch: {$page}");
+            // error_log("Qraga Action Scheduler Error: Qraga_Product_Sync class not found. Job ID: {$job_id}, Batch: {$page}");
             $job_status['errors'][] = ['timestamp' => time(), 'message' => 'Critical: Qraga_Product_Sync class not found.'];
             $job_status['status'] = 'failed';
             set_transient($transient_key, $job_status, DAY_IN_SECONDS);
@@ -459,7 +437,7 @@ class Qraga_Api // Renamed class
                     if ( !empty( $transformed_data ) ) {
                         $transformed_products_payload[] = $transformed_data;
                     } else {
-                        error_log("Qraga Batch Sync: Failed to transform product ID {$product->get_id()} for Job {$job_id}");
+                        // error_log("Qraga Batch Sync: Failed to transform product ID {$product->get_id()} for Job {$job_id}");
                         $job_status['errors'][] = ['timestamp' => time(), 'product_id' => $product->get_id(), 'message' => 'Failed to transform product data.'];
                         $job_status['error_ids'][] = $product->get_id();
                         $products_failed_in_batch++;
@@ -471,7 +449,7 @@ class Qraga_Api // Renamed class
                     $products_synced_in_batch = count( $transformed_products_payload ); // Assume all sent were attempted
 
                     if ( !$api_response['success'] ) {
-                        error_log("Qraga Batch Sync API Error: Job ID {$job_id}, Batch {$page}. Message: " . ($api_response['message'] ?? 'Unknown API error'));
+                        // error_log("Qraga Batch Sync API Error: Job ID {$job_id}, Batch {$page}. Message: " . ($api_response['message'] ?? 'Unknown API error'));
                         $batch_api_errors[] = 'API Error on batch send: ' . ($api_response['message'] ?? 'Unknown error') . (isset($api_response['response_code']) ? ' (Code: ' . $api_response['response_code'] . ')' : '');
                         // Potentially log product IDs from this batch if API can return per-item errors in bulk
                         // For now, mark all in this specific API call as potentially problematic in logs.
@@ -485,9 +463,9 @@ class Qraga_Api // Renamed class
                         // if ($body && isset($body['errors'])) { ... parse $body['errors'] ... }
                     }
                 } else if ($products_failed_in_batch > 0 && empty($transformed_products_payload)){
-                     error_log("Qraga Batch Sync: All products in batch {$page} for job {$job_id} failed transformation. Nothing sent to API.");
+                     // error_log("Qraga Batch Sync: All products in batch {$page} for job {$job_id} failed transformation. Nothing sent to API.");
                 } else {
-                    error_log("Qraga Batch Sync: No products transformed in batch {$page} for job {$job_id}, though products were queried. Products count: " . count($products));
+                    // error_log("Qraga Batch Sync: No products transformed in batch {$page} for job {$job_id}, though products were queried. Products count: " . count($products));
                 }
 
                 $job_status['processed'] += count($products); // All queried products are now "processed"
@@ -512,31 +490,29 @@ class Qraga_Api // Renamed class
                         'qraga_bulk_export'
                     );
                     if ($action_id === 0) {
-                        error_log("Qraga Batch Sync Error: Failed to schedule next batch ({$next_page}) for Job ID {$job_id}. Current batch {$page} processed.");
+                        // error_log("Qraga Batch Sync Error: Failed to schedule next batch ({$next_page}) for Job ID {$job_id}. Current batch {$page} processed.");
                         $job_status['errors'][] = ['timestamp' => time(), 'message' => "Critical: Failed to schedule next batch {$next_page}. Manual restart may be needed after this batch."];
                         $job_status['status'] = 'error_scheduling_next'; // Custom status
                         set_transient($transient_key, $job_status, DAY_IN_SECONDS);
                     } else {
-                        error_log("Qraga Batch Sync: Successfully processed batch {$page} for Job {$job_id}. Next batch {$next_page} scheduled with Action ID {$action_id}.");
+                        // error_log("Qraga Batch Sync: Successfully processed batch {$page} for Job {$job_id}. Next batch {$next_page} scheduled with Action ID {$action_id}.");
                     }
                 } else {
-                    // This was the last batch
                     $job_status['status'] = 'completed';
                     $job_status['end_time'] = time();
                     set_transient($transient_key, $job_status, DAY_IN_SECONDS);
-                    delete_option(self::ACTIVE_JOB_ID_OPTION); // Clear active job ID on completion
-                    error_log("Qraga Batch Sync: Completed all batches for Job ID {$job_id}. Cleared active job ID. Total processed: {$job_status['processed']}. Batches: {$job_status['batches']}.");
+                    delete_option(self::ACTIVE_JOB_ID_OPTION);
+                    // error_log("Qraga Batch Sync: Completed all batches for Job ID {$job_id}. Cleared active job ID. Total processed: {$job_status['processed']}. Batches: {$job_status['batches']}.");
                 }
             } else {
-                // No products found for this page, means we are done.
                 $job_status['status'] = 'completed';
                 $job_status['end_time'] = time();
                 set_transient($transient_key, $job_status, DAY_IN_SECONDS);
-                delete_option(self::ACTIVE_JOB_ID_OPTION); // Clear active job ID on completion (no products path)
-                error_log("Qraga Batch Sync: No more products found for Job ID {$job_id} at page {$page}. Marking as complete. Cleared active job ID. Total processed: {$job_status['processed']}. Batches: {$job_status['batches']}.");
+                delete_option(self::ACTIVE_JOB_ID_OPTION);
+                // error_log("Qraga Batch Sync: No more products found for Job ID {$job_id} at page {$page}. Marking as complete. Cleared active job ID. Total processed: {$job_status['processed']}. Batches: {$job_status['batches']}.");
             }
         } catch (Throwable $e) {
-            error_log("Qraga Action Scheduler FATAL Error: Job ID {$job_id}, Batch {$page}. Message: " . $e->getMessage() . " Trace: " . $e->getTraceAsString());
+            // error_log("Qraga Action Scheduler FATAL Error: Job ID {$job_id}, Batch {$page}. Message: " . $e->getMessage() . " Trace: " . $e->getTraceAsString());
             $job_status['status'] = 'failed';
             $job_status['errors'][] = ['timestamp' => time(), 'message' => 'Fatal error during batch processing: ' . $e->getMessage()];
             if (isset($job_status['end_time'])) unset($job_status['end_time']);
@@ -548,7 +524,7 @@ class Qraga_Api // Renamed class
             // This part is tricky without knowing Action Scheduler's exact retry and failure lifecycle for this action.
             // Let's clear it on 'failed' status if we are setting it here definitively.
             delete_option(self::ACTIVE_JOB_ID_OPTION); 
-            error_log("Qraga Batch Sync: Job ID {$job_id} failed. Cleared active job ID option due to fatal error.");
+            // error_log("Qraga Batch Sync: Job ID {$job_id} failed. Cleared active job ID option due to fatal error.");
             throw $e;
         }
     }
@@ -616,7 +592,7 @@ class Qraga_Api // Renamed class
                             // Found an active job via Action Scheduler that our transient agrees is active.
                             // Ensure our main option is synced with this discovered active job.
                             update_option(self::ACTIVE_JOB_ID_OPTION, $discovered_job_id);
-                            error_log("Qraga Current Job Status: Confirmed active job {$discovered_job_id} via Action Scheduler group query. Option updated. Returning its transient data.");
+                            // error_log("Qraga Current Job Status: Confirmed active job {$discovered_job_id} via Action Scheduler group query. Option updated. Returning its transient data.");
                             return new WP_REST_Response($status_data_from_transient, 200);
                         } else {
                             // Action Scheduler has an action, but our transient is missing, stale, or doesn't match.
@@ -630,21 +606,20 @@ class Qraga_Api // Renamed class
                             } elseif (!isset($status_data_from_transient['job_id']) || $status_data_from_transient['job_id'] !== $discovered_job_id) {
                                 $log_message .= "but its transient job_id ('" . ($status_data_from_transient['job_id'] ?? 'null') ."') did not match the action argument job_id.";
                             }
-                             error_log($log_message . " Treating as no active job for display.");
-                            // Potentially clear ACTIVE_JOB_ID_OPTION if it happened to be $discovered_job_id but transient is bad
+                             // error_log($log_message . " Treating as no active job for display.");
                             if (get_option(self::ACTIVE_JOB_ID_OPTION) === $discovered_job_id) {
                                 delete_option(self::ACTIVE_JOB_ID_OPTION);
                             }
                         }
                     } else {
-                         error_log("Qraga Current Job Status: Action {$action_id} from AS group 'qraga_bulk_export' missing 'job_id' arg.");
+                         // error_log("Qraga Current Job Status: Action {$action_id} from AS group 'qraga_bulk_export' missing 'job_id' arg.");
                     }
                 } else {
-                    error_log("Qraga Current Job Status: Failed to fetch valid action details for action ID {$action_id} from AS group query.");
+                    // error_log("Qraga Current Job Status: Failed to fetch valid action details for action ID {$action_id} from AS group query.");
                 }
             }
         } else {
-            error_log("Qraga Current Job Status: Action Scheduler functions not available for querying.");
+            // error_log("Qraga Current Job Status: Action Scheduler functions not available for querying.");
         }
 
         // If we reach here, no definitively active job (validated by our transient) was found.
@@ -659,16 +634,16 @@ class Qraga_Api // Renamed class
                 in_array($status_data_option['status'], $active_statuses_for_job_transient, true) && 
                 isset($status_data_option['job_id']) && $status_data_option['job_id'] === $active_job_id_from_option
             ) {
-                 error_log("Qraga Current Job Status: Using job {$active_job_id_from_option} from option as fallback.");
+                 // error_log("Qraga Current Job Status: Using job {$active_job_id_from_option} from option as fallback.");
                  return new WP_REST_Response( $status_data_option, 200 );
             } else if ($status_data_option) {
                  // Transient exists but not active, or job_id mismatch, or stale. Option is bad.
                 delete_option(self::ACTIVE_JOB_ID_OPTION);
-                error_log("Qraga Current Job Status: Fallback check for option {$active_job_id_from_option} found its transient stale/inactive. Cleared option.");
+                // error_log("Qraga Current Job Status: Fallback check for option {$active_job_id_from_option} found its transient stale/inactive. Cleared option.");
             } else {
                 // Option exists, transient gone. Option is bad.
                 delete_option(self::ACTIVE_JOB_ID_OPTION);
-                error_log("Qraga Current Job Status: Fallback check for option {$active_job_id_from_option} found its transient missing. Cleared option.");
+                // error_log("Qraga Current Job Status: Fallback check for option {$active_job_id_from_option} found its transient missing. Cleared option.");
             }
         }
 

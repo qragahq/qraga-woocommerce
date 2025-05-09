@@ -55,15 +55,14 @@ class Qraga_Assets // Renamed class
 ?>
 <?php
 			} else {
-				// Production mode: Enqueue compiled assets
 				// Renamed script handle to 'qraga-admin-app'
 				// Using QRAGA_URL and QRAGA_VERSION constants
 				wp_enqueue_script(
 					'qraga-admin-app', 
-					QRAGA_URL . 'includes/admin/assets/js/index.js', // Path to compiled JS
-					array('wp-i18n'), // Dependencies
+					QRAGA_URL . 'includes/admin/assets/js/index.js', 
+					array('wp-i18n'), 
 					QRAGA_VERSION, 
-					true // Load in footer
+					true 
 				);
 				// Renamed JavaScript object to qragaData for wp_localize_script
 				wp_localize_script(

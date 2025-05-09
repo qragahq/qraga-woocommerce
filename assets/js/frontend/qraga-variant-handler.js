@@ -19,11 +19,12 @@
 			const instance = window.qragaWidgetInstances[productId];
 
 			if (instance && typeof instance.setVariantId === 'function') {
-				const variantIdForWidget = variationId ? 'var-wc-' + variationId : null;
-				console.log(`Qraga Variant: Setting variant ID for product ${productId} to:`, variantIdForWidget);
+				// const variantIdForWidget = variationId ? 'var-wc-' + variationId : null; // Old prefixing
+				const variantIdForWidget = variationId ? String(variationId) : null; // Use raw ID
+				// console.log(`Qraga Variant: Setting variant ID for product ${productId} to:`, variantIdForWidget);
 				instance.setVariantId(variantIdForWidget);
 			} else {
-				 console.warn(`Qraga Variant: Widget instance not found for product ${productId} when trying to set variant.`);
+				 // console.warn(`Qraga Variant: Widget instance not found for product ${productId} when trying to set variant.`);
 			}
 		}
 
@@ -47,11 +48,11 @@
              }
 
 			if (!productId) {
-				console.warn('Qraga Variant: Could not determine product ID for variation form.', $form);
+				// console.warn('Qraga Variant: Could not determine product ID for variation form.', $form);
 				return; // Skip this form if product ID is unknown
 			}
 
-            console.log(`Qraga Variant: Setting up listeners for product ${productId}`);
+            // console.log(`Qraga Variant: Setting up listeners for product ${productId}`);
 
 			// Listen for WooCommerce variation changes on this specific form
 			$form.on('found_variation.qraga', function (event, variation) {
@@ -72,7 +73,7 @@
 			setTimeout(function() {
 				const initialVariationId = $form.find('input[name="variation_id"]').val();
 				if (initialVariationId && initialVariationId !== '0') {
-                    console.log(`Qraga Variant: Found initial variant ${initialVariationId} for product ${productId}`);
+                    // console.log(`Qraga Variant: Found initial variant ${initialVariationId} for product ${productId}`);
 					updateQragaWidgetVariant(productId, initialVariationId);
 				}
 			}, 150); // Slightly longer delay to ensure init script might have run

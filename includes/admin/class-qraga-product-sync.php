@@ -183,8 +183,8 @@ class Qraga_Product_Sync {
      */
     private function get_api_request_args( string $method = 'POST', string $content_type = 'application/json' ): array|string {
         $api_key = get_option( 'qraga_api_key', '' );
-        $url_base = get_option( 'qraga_endpoint_url', '' ); // Used for validation, not direct URL construction here
-        $site_id = get_option( 'qraga_site_id', '' ); // Used for validation
+        $url_base = get_option( 'qraga_endpoint_url', '' );
+        $site_id = get_option( 'qraga_site_id', '' );
 
         if ( empty( $url_base ) || empty( $site_id ) || empty( $api_key ) ) {
             $missing = [];
@@ -202,9 +202,9 @@ class Qraga_Product_Sync {
 
         return [
             'method'  => strtoupper($method),
-            'timeout' => 45, // From old service
+            'timeout' => 45,
             'headers' => $headers,
-            'data_format' => 'body', // From old service
+            'data_format' => 'body',
         ];
     }
     
@@ -217,7 +217,6 @@ class Qraga_Product_Sync {
         $site_id = get_option('qraga_site_id');
 
         if (empty($base_url) || empty($site_id)) {
-            error_log('Qraga Error: Endpoint URL or Site ID is not configured for single product API URL.');
             return null;
         }
         
@@ -225,7 +224,6 @@ class Qraga_Product_Sync {
 
         if (($method === 'PUT' || $method === 'DELETE')) {
             if (empty($product_identifier)) {
-                 error_log('Qraga Error: Product identifier is required for PUT/DELETE operations.');
                 return null;
             }
             $url .= '/' . rawurlencode($product_identifier);
@@ -240,7 +238,6 @@ class Qraga_Product_Sync {
     private function handle_api_response( $response, string $url ): array {
         if ( is_wp_error( $response ) ) {
             $error_message = $response->get_error_message();
-            error_log( "QragaService Request Failed to {$url}. Error: {$error_message}" );
             return [ 'success' => false, 'message' => "HTTP request failed: {$error_message}" ];
         }
 
@@ -248,14 +245,11 @@ class Qraga_Product_Sync {
         $response_body = wp_remote_retrieve_body( $response );
 
         if ( $response_code >= 200 && $response_code < 300 ) {
-            error_log("QragaService Request Success to {$url}. Response Code: {$response_code}");
             return [ 'success' => true, 'message' => 'Request successful.', 'response_code' => $response_code, 'body' => $response_body ];
         } elseif ($response_code === 401 || $response_code === 403) {
             $error_message = "Authentication/Authorization failed for {$url}. Check API Key. Response Code: {$response_code}. Body: {$response_body}";
-            error_log("QragaService Error: {$error_message}");
             return [ 'success' => false, 'message' => "Authentication/Authorization failed (Code: {$response_code}). Check API Key.", 'response_code' => $response_code ];
         } else {
-            error_log( "QragaService Request Failed to {$url}. Response Code: {$response_code}. Body: {$response_body}" );
             return [ 'success' => false, 'message' => "Endpoint returned error code: {$response_code}. Body: {$response_body}", 'response_code' => $response_code ];
         }
     }
@@ -270,11 +264,9 @@ class Qraga_Product_Sync {
         $site_id = get_option('qraga_site_id');
 
         if (empty($base_url) || empty($site_id)) {
-            error_log('Qraga Error: Endpoint URL or Site ID is not configured for bulk products API URL.');
             return null;
         }
         
-        // Example: v1/site/{site_id}/products/bulk - Adjust if Qraga API has a different bulk endpoint
         return trailingslashit($base_url) . 'v1/site/' . rawurlencode($site_id) . '/products/bulk'; 
     }
 
@@ -291,13 +283,11 @@ class Qraga_Product_Sync {
 
         $api_url = $this->get_bulk_products_api_url();
         if (!$api_url) {
-            error_log('Qraga Bulk Sync Error: Could not determine API URL for bulk send.');
             return ['success' => false, 'message' => 'Could not determine API URL for bulk send.'];
         }
 
         $args = $this->get_api_request_args('POST', 'application/x-ndjson');
-        if (is_string($args)) { // Error message from get_api_request_args if config incomplete
-            error_log("Qraga Bulk Sync Error: {$args}");
+        if (is_string($args)) {
             return ['success' => false, 'message' => $args];
         }
 
@@ -305,24 +295,16 @@ class Qraga_Product_Sync {
         foreach ($products_payload as $product_data) {
             $json_line = wp_json_encode($product_data);
             if ($json_line === false) {
-                error_log("Qraga Bulk Sync Error: Failed to JSON encode a product for NDJSON. Product ID (if available): " . ($product_data['id'] ?? 'N/A'));
-                // Decide: skip this product or fail the batch?
-                // For now, let's try to continue with other products, but log it.
                 continue; 
             }
             $ndjson_body .= $json_line . "\n";
         }
 
         if (empty(trim($ndjson_body))) {
-            error_log("Qraga Bulk Sync Error: NDJSON body is empty after processing products.");
             return ['success' => false, 'message' => 'Failed to prepare any product for NDJSON body.'];
         }
 
-        $args['body'] = trim($ndjson_body); // Trim trailing newline
-
-        error_log("Qraga Bulk Sync: Attempting POST to bulk endpoint: {$api_url} with " . count($products_payload) . " products.");
-        // For debugging, do not log the entire body in production if it's too large
-        // error_log("NDJSON Body: " . $args['body']); 
+        $args['body'] = trim($ndjson_body);
 
         $response = wp_remote_request($api_url, $args);
         return $this->handle_api_response($response, $api_url);
@@ -339,26 +321,18 @@ class Qraga_Product_Sync {
     public function process_product_sync( int $product_id ): array {
         $product = wc_get_product( $product_id );
 
-        // Exit early if product doesn't exist or is not a type we handle (simple/variable)
         if ( ! $product || ! $this->is_syncable_product_type( $product ) ) {
-            // Log this case? Maybe only if sync meta exists?
-            // error_log("Qraga Sync: Product {$product_id} not found or not syncable type during save event.");
             return ['success' => false, 'message' => 'Product not found or not syncable type.', 'product_id' => $product_id];
         }
 
         $product_status = $product->get_status();
         $was_synced = get_post_meta( $product_id, self::SYNC_META_KEY, true );
 
-        // --- Logic based on status --- 
         if ( $product_status === 'publish' ) {
-            // Product is published, proceed with Create or Update sync
-            error_log("Qraga Sync: Product {$product_id} is published. Processing sync (Create/Update).");
-
             $transformed_data = $this->transform_product_data( $product );
             $product_identifier_for_api = (string) $product_id;
 
             if ( empty( $transformed_data ) ) {
-                error_log('Qraga Product Sync: Failed to transform product ID ' . $product_id);
                 return ['success' => false, 'message' => 'Failed to transform product data.', 'product_id' => $product_id];
             }
 
@@ -366,46 +340,31 @@ class Qraga_Product_Sync {
             
             $api_url = $this->get_single_product_api_url($method, ($method === 'PUT' ? $product_identifier_for_api : null) );
             if (!$api_url) {
-                 error_log("Qraga Sync Error (Save): Could not determine API URL for product {$product_id}, method {$method}.");
-                 return ['success' => false, 'message' => 'Could not determine API URL.', 'product_id' => $product_id];
+                return ['success' => false, 'message' => 'Could not determine API URL.', 'product_id' => $product_id];
             }
 
             $args = $this->get_api_request_args( $method );
-            if (is_string($args)) { // Error message returned if config incomplete
-                error_log("Qraga Product Sync Error for product {$product_id}: {$args}");
+            if (is_string($args)) {
                 return ['success' => false, 'message' => $args, 'product_id' => $product_id];
             }
 
             $args['body'] = wp_json_encode( $transformed_data );
             if ($args['body'] === false) {
-                error_log("QragaService: Failed to JSON encode single product data for product {$product_id}.");
                 return ['success' => false, 'message' => 'Failed to encode product data to JSON.', 'product_id' => $product_id];
             }
             
-            error_log("Qraga Sync: Attempting {$method} for product {$product_id} to URL: {$api_url}");
             $response = wp_remote_request( $api_url, $args );
             $result = $this->handle_api_response( $response, $api_url );
 
             if ( $result['success'] ) {
                 update_post_meta( $product_id, self::SYNC_META_KEY, time() );
-                error_log('Qraga Product Sync Success (' . ( $was_synced ? 'Update' : 'Create' ) . '): Product ID ' . $product_id);
-            } else {
-                // Logged already in handle_api_response
-                // error_log('Qraga Product Sync Failed (' . ( $was_synced ? 'Update' : 'Create' ) . '): Product ID ' . $product_id . ' - Error: ' . $result['message']);
             }
             return array_merge($result, ['product_id' => $product_id]);
 
         } else {
-            // Product is NOT published (draft, pending, private, etc.)
-            error_log("Qraga Sync: Product {$product_id} status is '{$product_status}' (not published).");
-
             if ( $was_synced ) {
-                // It was previously synced, so we need to delete it from Qraga
-                error_log("Qraga Sync: Product {$product_id} was previously synced. Triggering delete due to status change.");
                 return $this->process_product_delete( $product_id );
             } else {
-                // It's not published and wasn't synced before, do nothing.
-                error_log("Qraga Sync: Product {$product_id} is not published and was not previously synced. No action taken.");
                 return ['success' => true, 'message' => 'Product not published and not previously synced. No sync action needed.', 'product_id' => $product_id];
             }
         }
@@ -418,14 +377,8 @@ class Qraga_Product_Sync {
     public function process_product_delete( int $product_id ): array {
          $post_type = get_post_type( $product_id );
         if ( $post_type !== 'product' && $post_type !== 'product_variation' ) {
-            // This check is from the new code, old service did it in the hook callback itself.
-            // Keeping it here for clarity before calling API.
             return ['success' => false, 'message' => 'Not a product post type.', 'product_id' => $product_id]; 
         }
-
-        // Check if it's a syncable type (optional, as we might want to delete non-syncable if they were ever synced by mistake)
-        // $product = wc_get_product( $product_id );
-        // if ( $product && !$this->is_syncable_product_type($product) ) { ... }
 
         $product_identifier_for_api = (string) $product_id;
         $api_url = $this->get_single_product_api_url('DELETE', $product_identifier_for_api);
@@ -435,22 +388,16 @@ class Qraga_Product_Sync {
         }
 
         $args = $this->get_api_request_args('DELETE');
-        if (is_string($args)) { // Error message returned
-            error_log("Qraga Delete Error for product {$product_id}: {$args}");
+        if (is_string($args)) {
             return ['success' => false, 'message' => $args, 'product_id' => $product_id];
         }
 
-        error_log("Qraga Delete: Attempting DELETE for product {$product_id} from URL: {$api_url}");
         $response = wp_remote_request( $api_url, $args );
         $result = $this->handle_api_response( $response, $api_url );
 
         if ( $result['success'] || (isset($result['response_code']) && $result['response_code'] === 404) ) {
             delete_post_meta( $product_id, self::SYNC_META_KEY );
-            error_log("Qraga Delete Success for product {$product_id}. Response Code: " . ($result['response_code'] ?? 'N/A'));
-            // Ensure success is true if it was a 404, as that means it's gone from Qraga
             $result['success'] = true; 
-        } else {
-            error_log( "Qraga Delete Failed for product {$product_id}. Error: " . $result['message'] );
         }
         return array_merge($result, ['product_id' => $product_id]);
     }
@@ -462,7 +409,6 @@ class Qraga_Product_Sync {
 
     public function handle_product_trash_hook( int $post_id ) {
         if ( get_post_type( $post_id ) === 'product' ) {
-            error_log("Qraga Sync Hook: Handling trash for product ID {$post_id}");
             $this->process_product_delete( $post_id );
         }
     }
@@ -470,7 +416,6 @@ class Qraga_Product_Sync {
     public function handle_product_delete_hook( int $post_id ) {
         $post_type = get_post_type( $post_id );
         if ( $post_type === 'product' || $post_type === 'product_variation' ) {
-            error_log("Qraga Sync Hook: Handling permanent delete for post ID {$post_id}");
             $this->process_product_delete( $post_id );
         }
     }
@@ -479,7 +424,6 @@ class Qraga_Product_Sync {
      * Checks if the current product is syncable.
      */
     private function is_syncable_product_type( $product ) {
-        // This is from the new code, seems reasonable to keep.
         return $product->is_type( array( 'simple', 'variable' ) );
     }
 }

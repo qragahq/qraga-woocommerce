@@ -28,30 +28,21 @@ class Qraga_Product_Widget_Widget extends WP_Widget {
      * @param array $instance Saved values from database.
      */
     public function widget( $args, $instance ) {
-        // Only attempt to display on single product pages
         if ( ! is_singular('product') ) {
-            // Optional: Output nothing, or a debug comment
-            // if ( defined('WP_DEBUG') && WP_DEBUG ) {
-            //     echo '<!-- Qraga Widget: Not a single product page -->';
-            // }
             return; 
         }
 
-        // Check if the main display class exists
         if (!class_exists('Qraga_Widget_Display')) {
-            if ( defined('WP_DEBUG') && WP_DEBUG ) {
-                echo '<!-- Qraga Widget Error: Display class not found -->';
-            }
              return;
         }
         
-        echo $args['before_widget']; // Theme wrapper start
+        echo $args['before_widget'];
         
         // Output the placeholder div using the same method as the block
         // We don't have block attributes here, but render_placeholder handles defaults
         echo Qraga_Widget_Display::render_placeholder(); 
         
-        echo $args['after_widget']; // Theme wrapper end
+        echo $args['after_widget'];
     }
 
     /**
