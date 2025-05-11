@@ -81,7 +81,7 @@ final class Qraga_Plugin
             return; 
         }
         
-        $block_json_path = QRAGA_ABSPATH . 'includes/admin/backend/src/blocks/qraga-widget/'; 
+        $block_json_path = QRAGA_ABSPATH . 'includes/admin/blocks/qraga-product-widget/build/'; 
 
         if ( file_exists( $block_json_path . 'block.json' ) ) {
              register_block_type( $block_json_path );
