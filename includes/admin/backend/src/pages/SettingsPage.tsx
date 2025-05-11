@@ -106,7 +106,7 @@ const SettingsPage: React.FC = () => {
                 name="siteId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Site ID (previously Shop ID)</FormLabel>
+                    <FormLabel>Site ID</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter your Qraga Site ID" {...field} />
                     </FormControl>
@@ -152,7 +152,7 @@ const SettingsPage: React.FC = () => {
                     <FormControl>
                       <Input placeholder="Enter your Qraga Widget ID (optional)" {...field} />
                     </FormControl>
-                    <FormDescription>The ID for the Qraga product page widget, if used.</FormDescription>
+                    <FormDescription>The ID of the Qraga shopping assistant for product pages.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

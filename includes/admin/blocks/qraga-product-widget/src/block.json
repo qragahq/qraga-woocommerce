@@ -3,10 +3,10 @@
 	"apiVersion": 3,
 	"name": "qraga/qraga-product-widget",
 	"version": "0.1.0",
-	"title": "Qraga Product Widget",
+	"title": "Qraga Widget",
 	"category": "widgets",
 	"icon": "smiley",
-	"description": "Displays the Qraga widget for the current product, mirroring the classic widget functionality.",
+	"description": "Displays Qraga's shopping assitant product widget",
 	"example": {},
 	"supports": {
 		"html": false

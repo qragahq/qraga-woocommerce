@@ -34,10 +34,10 @@ export default function Edit() {
 	return (
 		<div { ...blockProps }>
 			<p>
-				{ __( 'Displays the Qraga Product Widget on single product pages.', 'qraga-product-widget' ) }
+				{ __( 'Displays the Qraga product assistant widget on single product pages.', 'qraga-product-widget' ) }
 			</p>
 			<p>
-				<em>{ __( 'Ensure Site ID and Widget ID are configured in Qraga settings.', 'qraga-product-widget' ) }</em>
+				<em>{ __( 'Ensure configuration is set at Qraga settings.', 'qraga-product-widget' ) }</em>
 			</p>
 		</div>
 	);
