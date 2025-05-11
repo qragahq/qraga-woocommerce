@@ -68,3 +68,5 @@ function qraga_missing_woocommerce_notice() {
 
 // Hook into plugins_loaded to initialize
 add_action( 'plugins_loaded', 'qraga_initialize_plugin' );
+
+// The render_qraga_product_widget_block function that was here has been moved to Qraga_Plugin class.

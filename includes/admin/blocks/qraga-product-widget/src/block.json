@@ -6,7 +6,7 @@
 	"title": "Qraga Product Widget",
 	"category": "widgets",
 	"icon": "smiley",
-	"description": "Example block scaffolded with Create Block tool.",
+	"description": "Displays the Qraga widget for the current product, mirroring the classic widget functionality.",
 	"example": {},
 	"supports": {
 		"html": false

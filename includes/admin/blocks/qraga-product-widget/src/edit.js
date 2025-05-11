@@ -30,9 +30,15 @@ import './editor.scss';
  * @return {Element} Element to render.
  */
 export default function Edit() {
+	const blockProps = useBlockProps();
 	return (
-		<p { ...useBlockProps() }>
-			{ __( 'Qraga Product Widget – hello from the editor!', 'qraga-product-widget' ) }
-		</p>
+		<div { ...blockProps }>
+			<p>
+				{ __( 'Displays the Qraga Product Widget on single product pages.', 'qraga-product-widget' ) }
+			</p>
+			<p>
+				<em>{ __( 'Ensure Site ID and Widget ID are configured in Qraga settings.', 'qraga-product-widget' ) }</em>
+			</p>
+		</div>
 	);
 }

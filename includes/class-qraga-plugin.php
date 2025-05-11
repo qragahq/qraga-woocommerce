@@ -28,11 +28,21 @@ final class Qraga_Plugin
      */
     private function define_constants()
     {
-        $this->define('QRAGA_ABSPATH', dirname(QRAGA_PLUGIN_FILE) . '/');
-        $this->define('QRAGA_DEV', false);
-        $this->define('QRAGA_REST_API_ROUTE', 'qraga/v1');
-        $this->define('QRAGA_URL', plugin_dir_url(QRAGA_PLUGIN_FILE)); 
-        $this->define('QRAGA_VERSION', $this->get_version());
+        if (!defined('QRAGA_ABSPATH')) {
+            define('QRAGA_ABSPATH', dirname(QRAGA_PLUGIN_FILE) . '/');
+        }
+        if (!defined('QRAGA_DEV')) {
+            define('QRAGA_DEV', false);
+        }
+        if (!defined('QRAGA_REST_API_ROUTE')) {
+            define('QRAGA_REST_API_ROUTE', 'qraga/v1');
+        }
+        if (!defined('QRAGA_URL')) {
+            define('QRAGA_URL', plugin_dir_url(QRAGA_PLUGIN_FILE)); 
+        }
+        if (!defined('QRAGA_VERSION')) {
+            define('QRAGA_VERSION', $this->version);
+        }
     }
     
     /**
@@ -64,28 +74,12 @@ final class Qraga_Plugin
      */
     private function init_hooks()
     {
+        add_action('init', [$this, 'register_blocks'], 0);
         add_action('init', [$this, 'register_shortcodes']);
-        add_action( 'init', [$this, 'register_blocks']);
         add_action( 'widgets_init', [$this, 'register_widgets']);
         add_action( 'wp_enqueue_scripts', [ 'Qraga_Widget_Display', 'register_and_enqueue_scripts' ] );
         add_action( 'customize_register', array( $this, 'customize_register' ) );
         add_action( 'template_redirect', array( $this, 'hook_widget_render' ) );
-    }
-
-    /**
-     * Register blocks.
-     * @since 0.1.0
-     */
-    public function register_blocks() {
-        if ( ! class_exists('Qraga_Widget_Display') ) {
-            return; 
-        }
-        
-        $block_json_path = QRAGA_ABSPATH . 'includes/admin/blocks/qraga-product-widget/build/'; 
-
-        if ( file_exists( $block_json_path . 'block.json' ) ) {
-             register_block_type( $block_json_path );
-        }
     }
 
     /**
@@ -117,19 +111,6 @@ final class Qraga_Plugin
     public function get_version()
     {
         return $this->version;
-    }
-
-    /**
-     * Define constant if not already set.
-     * @since  0.1.0
-     * @param  string $name
-     * @param  string|bool $value
-     */
-    private function define($name, $value)
-    {
-        if (!defined($name)) {
-            define($name, $value);
-        }
     }
 
     /**
@@ -244,5 +225,35 @@ final class Qraga_Plugin
      */
     public function display_widget_from_hook() {
         echo Qraga_Widget_Display::render_placeholder();
+    }
+
+    public function register_blocks() {
+        $block_build_path = QRAGA_ABSPATH . 'includes/admin/blocks/qraga-product-widget/build/'; 
+
+        if ( !file_exists( $block_build_path . 'block.json' ) ) {
+            return;
+        }
+
+        register_block_type( 
+            $block_build_path, 
+            array(
+                'render_callback' => [ 'Qraga_Plugin', 'render_qraga_product_widget_block' ], 
+            )
+        );
+    }
+
+    /**
+     * Render callback for the Qraga Product Widget block.
+     */
+    public static function render_qraga_product_widget_block( $attributes, $content, $block ) {
+        if ( ! is_singular('product') ) {
+            return '';
+        }
+    
+        if ( ! class_exists('Qraga_Widget_Display') ) {
+            return ''; 
+        }
+        
+        return Qraga_Widget_Display::render_placeholder( $attributes );
     }
 } 
