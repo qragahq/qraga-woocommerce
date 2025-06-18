@@ -34,6 +34,7 @@ class Qraga_Product_Sync {
             'description' => $product->get_description() ?: $product->get_short_description(),
             'categories'  => $this->get_term_names( $product->get_category_ids(), 'product_cat' ),
             'tags'        => $this->get_term_names( $product->get_tag_ids(), 'product_tag' ),
+            'slug'        => $product->get_slug(),
             'features'    => new \stdClass(), // Initialize as empty object
             'variants'    => [],
         ];
