@@ -59,7 +59,7 @@ class Qraga_Assets // Renamed class
 				// Using QRAGA_URL and QRAGA_VERSION constants
 				wp_enqueue_script(
 					'qraga-admin-app', 
-					QRAGA_URL . 'includes/admin/assets/js/index.js', 
+					QRAGA_URL . 'includes/admin/assets/js/main.js', 
 					array('wp-i18n'), 
 					QRAGA_VERSION, 
 					true 
@@ -74,12 +74,8 @@ class Qraga_Assets // Renamed class
 						'baseUrl'  => $baseUrl,
 					)
 				);
-				// Enqueue compiled CSS if it exists (Vite might put it in assets/css by default)
-				$css_file_path = QRAGA_ABSPATH . 'includes/admin/assets/css/index.css'; // Common output for Vite
-				$css_file_url = QRAGA_URL . 'includes/admin/assets/css/index.css';
-				if (file_exists($css_file_path)) {
-					wp_enqueue_style('qraga-admin-styles', $css_file_url, array(), QRAGA_VERSION);
-				}
+				// CSS is inlined into the main.js file by Vite build system
+				// No separate CSS file needs to be loaded
 			}
 		}
 	}

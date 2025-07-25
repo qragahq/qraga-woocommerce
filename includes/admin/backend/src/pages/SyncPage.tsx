@@ -59,7 +59,7 @@ const SyncPage: React.FC = () => {
     const [currentSyncStatusMessage, setCurrentSyncStatusMessage] = useState<string | null>('Checking for active jobs...'); // Initial message
     const [jobDetails, setJobDetails] = useState<BulkExportStatusResponse | null>(null);
     
-    const pollingIntervalIdRef = useRef<number | null>(null);
+    const pollingIntervalIdRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Effect to fetch current job status on component mount
     useEffect(() => {
@@ -97,11 +97,12 @@ const SyncPage: React.FC = () => {
                     setCurrentSyncStatusMessage('No active sync job found. Click button to start.');
                     setIsSyncing(false);
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('Failed to fetch current active job status:', error);
                 setCurrentSyncStatusMessage('Error checking for active jobs. Please try starting a new sync.');
                 setIsSyncing(false);
-                toast.error(`Failed to check for active jobs: ${error.message}`);
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                toast.error(`Failed to check for active jobs: ${errorMessage}`);
             }
         };
 
@@ -195,10 +196,11 @@ const SyncPage: React.FC = () => {
                 }
                 // setCurrentSyncStatusMessage is already set above with final status
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             stopPolling();
             setIsSyncing(false);
-            toast.error(`Error fetching sync status: ${error.message}`);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            toast.error(`Error fetching sync status: ${errorMessage}`);
             setCurrentSyncStatusMessage('Error fetching sync status. Please check console.');
             console.error('Polling error:', error);
         }

@@ -38,6 +38,24 @@ build-style/
 build-types/
 dist/
 
+# Build outputs (keep these for WordPress integration)
+includes/admin/assets/js/main.js
+includes/admin/assets/js/main.css
+includes/admin/blocks/qraga-product-widget/build/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# IDE files (additional)
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
 # Project files
 node_modules/
 vendor/
@@ -47,6 +65,7 @@ tsconfig.tsbuildinfo
 
 # Node Package Dependencies
 package-lock.json
+pnpm-lock.yaml
 
 # wp-env config
 .wp-env.override.json
