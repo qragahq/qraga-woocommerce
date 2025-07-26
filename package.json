@@ -18,7 +18,9 @@
     "format": "wp-scripts format includes/admin/blocks/qraga-product-widget/src",
     "watch": "concurrently \"npm run watch:admin\" \"npm run watch:block\"",
     "watch:admin": "tsc --project includes/admin/backend/tsconfig.json && vite build --config build-configs/vite.admin.config.ts --watch",
-    "watch:block": "wp-scripts start --config build-configs/webpack.block.config.cjs"
+    "watch:block": "wp-scripts start --config build-configs/webpack.block.config.cjs",
+    "package": "npm run build && npm run create-zip",
+    "create-zip": "node scripts/create-zip.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -61,6 +63,7 @@
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.3.0",
     "@wordpress/scripts": "^27.6.0",
+    "archiver": "^7.0.1",
     "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.2",
     "eslint": "^8.45.0",

@@ -6,7 +6,7 @@
 	"title": "Qraga Widget",
 	"category": "widgets",
 	"icon": "smiley",
-	"description": "Displays Qraga's shopping assitant product widget",
+	"description": "Displays Qraga's shopping assistant product widget",
 	"example": {},
 	"supports": {
 		"html": false
