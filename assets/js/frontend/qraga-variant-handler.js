@@ -1,5 +1,6 @@
 // Simple frontend script to update Qraga widget on variant change
 
+/* global jQuery */
 (function ($) {
 	// Use jQuery provided by WordPress/WooCommerce for simplicity
 	'use strict';
@@ -24,7 +25,7 @@
 				// console.log(`Qraga Variant: Setting variant ID for product ${productId} to:`, variantIdForWidget);
 				instance.setVariantId(variantIdForWidget);
 			} else {
-				 // console.warn(`Qraga Variant: Widget instance not found for product ${productId} when trying to set variant.`);
+				// console.warn(`Qraga Variant: Widget instance not found for product ${productId} when trying to set variant.`);
 			}
 		}
 
