@@ -272,7 +272,7 @@ class Qraga_Api // Renamed class
                 ],
             ],
         ];
-        return $this->add_additional_fields_schema( $schema );
+        return $schema;
     }
 
     /**

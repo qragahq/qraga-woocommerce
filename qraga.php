@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Plugin Name: Qraga WooCommerce Integration
- * Description: Integrates Qraga services with WooCommerce for product synchronization and widgets.
+ * Plugin Name: Qraga
+ * Description: Turn Product Pages Into AI-Guided Experiences. AI-powered product assistance that helps customers make confident buying decisions.
  * Version: 0.2.0
  * Author: Qraga Team
  * Author URI: https://qraga.com/
@@ -59,7 +59,7 @@ function qraga_missing_woocommerce_notice() {
 		<p>
 			<?php
 			/* translators: %s: WooCommerce website URL */
-			echo wp_kses_post( sprintf( __( 'Qraga WooCommerce Integration requires WooCommerce to be installed and active. You can download %s.', 'qraga' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) );
+			echo wp_kses_post( sprintf( __( 'Qraga requires WooCommerce to be installed and active. You can download %s.', 'qraga' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) );
 			?>
 		</p>
 	</div>

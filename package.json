@@ -1,7 +1,7 @@
 {
   "name": "qraga-woocommerce",
   "version": "0.2.0",
-  "description": "Qraga WooCommerce Integration Plugin - Unified Build System",
+  "description": "Qraga - AI-Powered Shopping Assistant for WooCommerce",
   "private": true,
   "type": "module",
   "scripts": {

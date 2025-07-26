@@ -30,6 +30,16 @@ module.exports = {
                 browser: true,
                 es6: true,
             },
+        },
+        {
+            files: ['**/*.cjs'],
+            env: {
+                node: true,
+            },
+            rules: {
+                '@typescript-eslint/no-var-requires': 'off',
+                'import/no-commonjs': 'off',
+            },
         }
     ]
 }; 

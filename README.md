@@ -1,15 +1,15 @@
-# Qraga WooCommerce Integration Plugin
+# Qraga - AI-Powered Shopping Assistant
 
-A sophisticated WordPress/WooCommerce plugin that integrates Qraga's shopping assistant services with your WooCommerce store, providing seamless product synchronization and intelligent widget integration.
+Turn your product pages into AI-guided experiences. Qraga provides intelligent product assistance that helps customers make confident buying decisions, seamlessly integrated into your WooCommerce store.
 
 ## Features
 
-- **🔄 Automatic Product Sync**: Real-time synchronization of WooCommerce products with Qraga services
-- **🎯 Smart Widget Integration**: Display Qraga widgets on product pages using WordPress hooks or Gutenberg blocks
-- **⚡ React Admin Dashboard**: Modern admin interface for settings, analytics, and bulk operations
-- **🧩 Gutenberg Block Support**: Native WordPress block for easy widget placement
-- **📱 Variant Support**: Automatic handling of WooCommerce product variations
-- **🔌 WordPress Standards**: Full compatibility with WordPress coding standards and HPOS
+- **🤖 AI Product Assistant**: Intelligent shopping guidance that understands your products and customer needs
+- **🎯 Smart Recommendations**: Personalized product suggestions based on customer preferences and behavior
+- **💬 Interactive Q&A**: Customers can ask questions and get instant, accurate product information
+- **🛍️ Confident Decisions**: Reduce cart abandonment by helping customers find exactly what they need
+- **📱 Seamless Integration**: Works beautifully on both classic and modern WordPress themes
+- **⚡ Easy Setup**: Simple configuration with powerful admin dashboard for monitoring and optimization
 
 ## Installation
 
@@ -46,7 +46,7 @@ A sophisticated WordPress/WooCommerce plugin that integrates Qraga's shopping as
 
 5. **Activate Plugin**:
    - Go to WordPress Admin → Plugins
-   - Find "Qraga WooCommerce Integration" and click Activate
+   - Find "Qraga" and click Activate
 
 6. **Configure Settings**:
    - Navigate to **Qraga** in your WordPress admin menu
@@ -189,27 +189,22 @@ qraga-woocommerce/
 └── assets/js/frontend/           # Frontend JavaScript
 ```
 
-## Core Components
+## What Qraga Does For Your Customers
 
-### React Admin Dashboard
-- **Pages**: Overview, Settings, Bulk Sync
-- **Tech Stack**: React 18, TypeScript, Tailwind CSS, React Query
-- **Features**: Form handling, API integration, real-time updates
+### AI Shopping Assistant
+- **Smart Guidance**: Helps customers understand products and make better choices
+- **Instant Answers**: Responds to customer questions about products in real-time
+- **Personalized Experience**: Adapts recommendations based on customer behavior
 
-### Gutenberg Block
-- **Block Name**: `qraga/qraga-product-widget`
-- **Purpose**: Easy widget placement in block themes
-- **Features**: Visual editor integration, custom icon
+### Seamless Integration
+- **Works Everywhere**: Automatically appears on product pages across all themes
+- **Mobile Optimized**: Perfect experience on desktop, tablet, and mobile devices
+- **Fast Loading**: Optimized performance that doesn't slow down your store
 
-### PHP Backend
-- **REST API**: Custom endpoints for product sync and settings
-- **Hooks Integration**: WooCommerce product lifecycle events
-- **Customizer**: Widget positioning controls for classic themes
-
-### Frontend Integration
-- **Widget Initialization**: Automatic widget loading on product pages
-- **Variant Handling**: Dynamic updates for product variations
-- **Performance**: Optimized loading and minimal DOM manipulation
+### Store Owner Benefits
+- **Easy Management**: Simple admin dashboard to monitor performance and settings
+- **Increased Sales**: Helps customers make confident purchase decisions
+- **Reduced Support**: AI handles common product questions automatically
 
 ## API Integration
 
@@ -343,5 +338,5 @@ This plugin is licensed under the GPL v3.0 or later.
 
 ### Version 0.1.0
 - Initial release
-- Basic product synchronization
-- Widget display functionality 
+- AI-powered product assistance
+- Smart customer guidance features 
