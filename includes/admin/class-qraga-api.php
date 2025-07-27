@@ -117,6 +117,12 @@ class Qraga_Api // Renamed class
      * @return string
      */
     public static function compute_endpoint_url( $region = '', $apiVersion = '' ) {
+        // Check for environment variable override (for development)
+        $envUrl = getenv('QRAGA_API_URL');
+        if ( !empty( $envUrl ) ) {
+            return rtrim( $envUrl, '/' );
+        }
+        
         if ( empty( $region ) ) {
             $region = get_option( 'qraga_region', 'US' );
         }

@@ -84,4 +84,15 @@ npm run package
 ### Requirements for Development
 
 - **Node.js**: 16.0 or higher
-- **npm**: 8.0 or higher 
+- **npm**: 8.0 or higher
+
+### Environment Variables
+
+For development, you can override the API endpoint:
+
+```bash
+# Override Qraga API URL (useful for local development/staging)
+export QRAGA_API_URL="http://localhost:3000/api/v1"
+```
+
+This will bypass the region-based URL mapping and use your custom endpoint instead. 
