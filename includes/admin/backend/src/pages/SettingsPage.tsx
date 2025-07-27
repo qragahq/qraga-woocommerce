@@ -14,16 +14,17 @@ import {
   Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // If needed later
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Import from the new service file
 import { fetchQragaSettings, saveQragaSettings, QragaSettings } from '@/services/settings.service';
 
-// Define the validation schema using Zod (keys match QragaSettings for consistency)
+// Define the validation schema using Zod (keys match SettingsFormData for consistency)
 const settingsFormSchema = z.object({
   siteId: z.string().min(1, { message: "Site ID cannot be empty." }).trim(),
   apiKey: z.string().min(1, { message: "API Key cannot be empty." }).trim(),
-  endpointUrl: z.string().url({ message: "Please enter a valid URL." }).trim().or(z.literal('')), // Allow empty or valid URL
+  region: z.string().min(1, { message: "Region cannot be empty." }).trim(),
+  apiVersion: z.string().min(1, { message: "API version cannot be empty." }).trim(),
   widgetId: z.string().trim().optional(), // Optional
 });
 
@@ -42,7 +43,8 @@ const SettingsPage: React.FC = () => {
     defaultValues: {
       siteId: '',
       apiKey: '',
-      endpointUrl: '',
+      region: 'US',
+      apiVersion: 'v1',
       widgetId: '',
     },
   });
@@ -52,7 +54,8 @@ const SettingsPage: React.FC = () => {
       const formValues: SettingsFormSchemaType = {
         siteId: currentSettings.siteId || '',
         apiKey: currentSettings.apiKey || '',
-        endpointUrl: currentSettings.endpointUrl || '',
+        region: currentSettings.region || 'US',
+        apiVersion: currentSettings.apiVersion || 'v1',
         widgetId: currentSettings.widgetId || '',
       };
       form.reset(formValues);
@@ -70,14 +73,15 @@ const SettingsPage: React.FC = () => {
         const formValues: SettingsFormSchemaType = {
             siteId: savedData.siteId || '',
             apiKey: savedData.apiKey || '',
-            endpointUrl: savedData.endpointUrl || '',
+            region: savedData.region || 'US',
+            apiVersion: savedData.apiVersion || 'v1',
             widgetId: savedData.widgetId || '',
         };
         form.reset(formValues);
       },
       onError: (err) => {
         toast.error("Error Saving Settings", {
-          description: (err as any)?.message || "An unexpected error occurred."
+          description: (err as Error)?.message || "An unexpected error occurred."
         });
       },
     }
@@ -131,20 +135,6 @@ const SettingsPage: React.FC = () => {
               />
               <FormField
                 control={form.control}
-                name="endpointUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Endpoint URL</FormLabel>
-                    <FormControl>
-                      <Input type="url" placeholder="e.g., https://api.qraga.com/v1" {...field} />
-                    </FormControl>
-                    <FormDescription>The full base URL for the Qraga API.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="widgetId"
                 render={({ field }) => (
                   <FormItem>
@@ -153,6 +143,48 @@ const SettingsPage: React.FC = () => {
                       <Input placeholder="Enter your Qraga Widget ID (optional)" {...field} />
                     </FormControl>
                     <FormDescription>The ID of the Qraga shopping assistant for product pages.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="region"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Region</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select region" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="US">United States</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Your Qraga service region (currently only US available).</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="apiVersion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>API Version</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select API version" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="v1">v1</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Qraga API version (currently only v1 available).</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

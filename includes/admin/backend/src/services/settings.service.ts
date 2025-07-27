@@ -4,7 +4,9 @@ import apiFetch from '@wordpress/api-fetch';
 export interface QragaSettings {
     siteId: string;
     apiKey: string;
-    endpointUrl: string;
+    region: string;
+    apiVersion: string;
+    endpointUrl: string; // Computed from region and apiVersion
     widgetId?: string;
 }
 
@@ -13,7 +15,8 @@ export interface QragaSettings {
 export interface SettingsFormData {
     siteId: string;
     apiKey: string;
-    endpointUrl: string;
+    region: string;
+    apiVersion: string;
     widgetId?: string;
 }
 

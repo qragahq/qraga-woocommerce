@@ -102,20 +102,49 @@ class Qraga_Api // Renamed class
         $options = array(
             $prefix . 'site_id',       
             $prefix . 'api_key',       
-            $prefix . 'endpoint_url',  
+            $prefix . 'region',
+            $prefix . 'api_version',
             $prefix . 'widget_id',     
-            // Removed shop_id and endpoint_region
         );
         return $options;
     }
 
+    /**
+     * Helper function to compute the endpoint URL based on region and API version
+     * 
+     * @param string $region
+     * @param string $apiVersion
+     * @return string
+     */
+    public static function compute_endpoint_url( $region = '', $apiVersion = '' ) {
+        if ( empty( $region ) ) {
+            $region = get_option( 'qraga_region', 'US' );
+        }
+        if ( empty( $apiVersion ) ) {
+            $apiVersion = get_option( 'qraga_api_version', 'v1' );
+        }
+        
+        // Map region to base URL
+        $regionUrls = [
+            'US' => 'https://api-us.qraga.com'
+        ];
+        
+        $baseUrl = isset($regionUrls[$region]) ? $regionUrls[$region] : $regionUrls['US'];
+        return $baseUrl . '/' . $apiVersion;
+    }
+
     public function get_settings(WP_REST_Request $request)
     {
-        // Match the keys used in the old controller's response
+        $region = get_option( 'qraga_region', 'US' );
+        $apiVersion = get_option( 'qraga_api_version', 'v1' );
+        $endpointUrl = self::compute_endpoint_url( $region, $apiVersion );
+        
         $settings = [
             'siteId'      => get_option( 'qraga_site_id', '' ),
             'apiKey'      => get_option( 'qraga_api_key', '' ),
-            'endpointUrl' => get_option( 'qraga_endpoint_url', '' ),
+            'region'      => $region,
+            'apiVersion'  => $apiVersion,
+            'endpointUrl' => $endpointUrl,
             'widgetId'    => get_option( 'qraga_widget_id', '' ),
         ];
         // Consider security implications of returning apiKey
@@ -137,17 +166,32 @@ class Qraga_Api // Renamed class
             update_option( 'qraga_api_key', sanitize_text_field( $params['apiKey'] ) );
             $updated = true;
         }
-        if ( isset( $params['endpointUrl'] ) ) {
-            $url = esc_url_raw( $params['endpointUrl'] );
-            // Basic validation like the old controller
-            if ( ! filter_var( $url, FILTER_VALIDATE_URL ) && ! empty( $url ) ) {
-                 return new WP_Error(
-                    'qraga_invalid_url',
-                    esc_html__( 'Invalid Endpoint URL format.', 'qraga' ),
+        if ( isset( $params['region'] ) ) {
+            $region = sanitize_text_field( $params['region'] );
+            // Validate region
+            $allowedRegions = ['US'];
+            if ( ! in_array( $region, $allowedRegions ) ) {
+                return new WP_Error(
+                    'qraga_invalid_region',
+                    esc_html__( 'Invalid region. Only US is currently supported.', 'qraga' ),
                     [ 'status' => 400 ]
                 );
             }
-            update_option( 'qraga_endpoint_url', $url );
+            update_option( 'qraga_region', $region );
+            $updated = true;
+        }
+        if ( isset( $params['apiVersion'] ) ) {
+            $apiVersion = sanitize_text_field( $params['apiVersion'] );
+            // Validate API version
+            $allowedVersions = ['v1'];
+            if ( ! in_array( $apiVersion, $allowedVersions ) ) {
+                return new WP_Error(
+                    'qraga_invalid_api_version',
+                    esc_html__( 'Invalid API version. Only v1 is currently supported.', 'qraga' ),
+                    [ 'status' => 400 ]
+                );
+            }
+            update_option( 'qraga_api_version', $apiVersion );
             $updated = true;
         }
          if ( isset( $params['widgetId'] ) ) {
@@ -257,12 +301,26 @@ class Qraga_Api // Renamed class
                     'context'     => [ 'view', 'edit' ], 
                     'readonly'    => false,
                 ],
-                'endpointUrl' => [
-                    'description' => esc_html__( 'Endpoint URL for the external service.', 'qraga' ),
+                'region' => [
+                    'description' => esc_html__( 'Service region for the Qraga API.', 'qraga' ),
                     'type'        => 'string',
-                    'format'      => 'uri',
+                    'enum'        => [ 'US' ],
                     'context'     => [ 'view', 'edit' ],
                     'readonly'    => false,
+                ],
+                'apiVersion' => [
+                    'description' => esc_html__( 'API version for the Qraga service.', 'qraga' ),
+                    'type'        => 'string',
+                    'enum'        => [ 'v1' ],
+                    'context'     => [ 'view', 'edit' ],
+                    'readonly'    => false,
+                ],
+                'endpointUrl' => [
+                    'description' => esc_html__( 'Computed endpoint URL for the external service.', 'qraga' ),
+                    'type'        => 'string',
+                    'format'      => 'uri',
+                    'context'     => [ 'view' ],
+                    'readonly'    => true,
                 ],
                 'widgetId' => [
                     'description' => esc_html__( 'The ID for the Qraga product page widget.', 'qraga' ),
