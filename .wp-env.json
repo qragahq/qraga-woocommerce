@@ -6,8 +6,5 @@
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG": true,
 		"SCRIPT_DEBUG": true
-	},
-	"env": {
-		"QRAGA_API_URL": "http://localhost:8000/v1"
 	}
 }

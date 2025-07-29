@@ -40,8 +40,8 @@ Turn your product pages into AI-guided experiences. Qraga provides intelligent p
 1. **Navigate** to **Qraga** in your WordPress admin menu
 2. **Enter** your Qraga API credentials:
    - Site ID
+   - API Key
    - Widget ID
-   - API endpoints
 3. **Configure** widget display settings
 4. **Save** your settings
 
