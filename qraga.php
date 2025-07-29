@@ -15,6 +15,8 @@
  * WC requires at least: 6.0
  * WC tested up to: 8.8
  *
+ * @package Qraga
+ * @license GPL-3.0-or-later
  */
 
 defined('ABSPATH') || exit;

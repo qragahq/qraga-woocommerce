@@ -1,10 +1,12 @@
 <?php
-
-defined('ABSPATH') || exit;
-
 /**
  * Main Qraga Plugin Class.
+ *
+ * @package Qraga
+ * @license GPL-3.0-or-later
  */
+
+defined('ABSPATH') || exit;
 final class Qraga_Plugin
 {
     private static $instance;

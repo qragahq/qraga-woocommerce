@@ -1,8 +1,9 @@
 <?php
-
 /**
  * Admin API for Qraga
  *
+ * @package Qraga
+ * @license GPL-3.0-or-later
  * @since     0.1.0
  */
 
