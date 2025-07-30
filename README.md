@@ -45,7 +45,7 @@ Turn your product pages into AI-guided experiences. Qraga provides intelligent p
 3. **Configure** widget display settings
 4. **Save** your settings
 
-5. Initialy sync your products at **Bulk Sync**
+5. **Sync your products** at **Bulk Sync**
 
 ### Widget Display
 
@@ -81,6 +81,13 @@ npm run package
 - `npm run package` - Create ZIP package
 - `npm run lint` - Check code quality
 
+### WordPress Environment (wp-env)
+
+- `npm run wp-env:start` - Start WordPress development environment
+- `npm run wp-env:stop` - Stop WordPress environment
+- `npm run wp-env:destroy` - Destroy and clean up environment
+- `npm run wp-env:reset` - Reset environment (destroy + start)
+
 ### Requirements for Development
 
 - **Node.js**: 16.0 or higher
@@ -88,11 +95,16 @@ npm run package
 
 ### Environment Variables
 
-For development, you can override the API endpoint:
+For development, you can override the API endpoint using WordPress environment variables:
 
-```bash
-# Override Qraga API URL (useful for local development/staging)
-export QRAGA_API_URL="http://localhost:3000/api/v1"
+Add to your `.wp-env.json` file:
+```json
+{
+  "config": {
+    "QRAGA_API_URL": "http://localhost:3000/api/v1",
+    "QRAGA_DEV": true
+  }
+}
 ```
 
 This will bypass the region-based URL mapping and use your custom endpoint instead. 

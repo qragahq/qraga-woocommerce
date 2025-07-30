@@ -19,10 +19,18 @@ class Qraga_Widget_Display {
      * Hook this into 'wp_enqueue_scripts'.
      */
     public static function register_and_enqueue_scripts() {
-        $cdn_url = 'https://cdn.qraga.com/widgets/assistant/v1/qraga-assistant.js'; 
+        $is_dev = defined('QRAGA_DEV') ? QRAGA_DEV : false;
+        
+        // Use local script in development, CDN in production
+        if ($is_dev) {
+            $script_url = 'http://localhost:9000/qraga-assistant.js';
+        } else {
+            $script_url = 'https://cdn.qraga.com/widgets/assistant/v1/qraga-assistant.js';
+        }
+        
         wp_register_script(
             self::CDN_HANDLE,
-            $cdn_url,
+            $script_url,
             [],
             null,
             true // Load in footer
@@ -119,12 +127,14 @@ class Qraga_Widget_Display {
         }
         
         $container_id = 'qraga-widget-container';
+        $is_dev = defined('QRAGA_DEV') ? QRAGA_DEV : false;
 
         $html_placeholder = sprintf(
-            '<div id="%s" class="qraga-widget-placeholder" data-widget-id="%s" data-product-id="%s" style="margin-top: 20px; margin-bottom: 20px;"></div>',
+            '<div id="%s" class="qraga-widget-placeholder" data-widget-id="%s" data-product-id="%s" data-dev="%s" style="margin-top: 20px; margin-bottom: 20px;"></div>',
             esc_attr($container_id),
             esc_attr($widget_id),
-            esc_attr((string)$product_id)
+            esc_attr((string)$product_id),
+            esc_attr($is_dev ? 'true' : 'false')
         );
 
         return $html_placeholder;

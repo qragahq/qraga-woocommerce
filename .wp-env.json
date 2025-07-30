@@ -5,6 +5,8 @@
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG": true,
-		"SCRIPT_DEBUG": true
+		"SCRIPT_DEBUG": true,
+		"QRAGA_API_URL": "http://host.docker.internal:8080/v1",
+		"QRAGA_DEV": true
 	}
 }

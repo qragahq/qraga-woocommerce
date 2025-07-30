@@ -20,6 +20,7 @@
 
         const widgetId = placeholder.dataset.widgetId;
         const productId = placeholder.dataset.productId; 
+        const isDev = placeholder.dataset.dev === 'true';
 
         // Note: siteId is no longer expected/used here based on previous PHP changes
         if (!widgetId || !productId) {
@@ -43,6 +44,11 @@
                     variantId: null 
                 }
             };
+            
+            // Add environment setting if dev mode is enabled
+            if (isDev) {
+                config.env = 'development';
+            }
 
             const qragaInstance = new window.Qraga(config);
             qragaInstance.init(); 

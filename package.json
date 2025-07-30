@@ -20,7 +20,12 @@
     "watch:admin": "tsc --project includes/admin/backend/tsconfig.json && vite build --config build-configs/vite.admin.config.ts --watch",
     "watch:block": "wp-scripts start --config build-configs/webpack.block.config.cjs",
     "package": "npm run build && npm run create-zip",
-    "create-zip": "node scripts/create-zip.js"
+    "create-zip": "node scripts/create-zip.js",
+    "wp-env": "wp-env",
+    "wp-env:start": "wp-env start",
+    "wp-env:stop": "wp-env stop",
+    "wp-env:destroy": "wp-env destroy",
+    "wp-env:reset": "wp-env destroy && wp-env start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -62,6 +67,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "@wordpress/env": "^9.4.0",
     "@wordpress/scripts": "^27.6.0",
     "archiver": "^7.0.1",
     "autoprefixer": "^10.4.16",

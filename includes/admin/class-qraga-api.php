@@ -118,10 +118,10 @@ class Qraga_Api // Renamed class
      * @return string
      */
     public static function compute_endpoint_url( $region = '', $apiVersion = '' ) {
-        // Check for environment variable override (for development)
-        $envUrl = getenv('QRAGA_API_URL');
-        if ( !empty( $envUrl ) ) {
-            return rtrim( $envUrl, '/' );
+        // Check for WordPress environment variable (from wp-env config)
+        $wpEnvUrl = defined('QRAGA_API_URL') ? QRAGA_API_URL : '';
+        if ( !empty( $wpEnvUrl ) ) {
+            return rtrim( $wpEnvUrl, '/' );
         }
         
         if ( empty( $region ) ) {
@@ -131,13 +131,14 @@ class Qraga_Api // Renamed class
             $apiVersion = get_option( 'qraga_api_version', 'v1' );
         }
         
-        // Map region to base URL
-        $regionUrls = [
+        // Default region to base URL mapping
+        $defaultRegionUrls = [
             'US' => 'https://api-us.qraga.com'
         ];
         
-        $baseUrl = isset($regionUrls[$region]) ? $regionUrls[$region] : $regionUrls['US'];
-        return $baseUrl . '/' . $apiVersion;
+        $baseUrl = isset($defaultRegionUrls[$region]) ? $defaultRegionUrls[$region] : $defaultRegionUrls['US'];
+        $endpointUrl = $baseUrl . '/' . $apiVersion;
+        return $endpointUrl;
     }
 
     public function get_settings(WP_REST_Request $request)

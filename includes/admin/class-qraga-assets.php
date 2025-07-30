@@ -32,51 +32,24 @@ class Qraga_Assets // Renamed class
 			$root = rest_url();
 			$baseUrl = QRAGA_URL; 
 
-			// Check for development mode using QRAGA_DEV
-			if (defined('QRAGA_DEV') && QRAGA_DEV) {
-?>
-				<script>
-					// Renamed JavaScript object to qragaData
-					var qragaData = {
-						apiNonce: '<?php echo $apiNonce; ?>',
-						root: '<?php echo $root; ?>',
-						baseUrl: '<?php echo $baseUrl; ?>',
-					}
-				</script>
-				<script type="module">
-					import RefreshRuntime from "http://localhost:5178/@react-refresh"
-					RefreshRuntime.injectIntoGlobalHook(window)
-					window.$RefreshReg$ = () => {}
-					window.$RefreshSig$ = () => (type) => type
-					window.__vite_plugin_react_preamble_installed__ = true
-				</script>
-				<script type="module" src="http://localhost:5178/@vite/client"></script>
-				<script type="module" src="http://localhost:5178/src/main.tsx"></script> <?php // Path to Vite dev server entry point
-?>
-<?php
-			} else {
-				// Renamed script handle to 'qraga-admin-app'
-				// Using QRAGA_URL and QRAGA_VERSION constants
-				wp_enqueue_script(
-					'qraga-admin-app', 
-					QRAGA_URL . 'includes/admin/assets/js/main.js', 
-					array('wp-i18n'), 
-					QRAGA_VERSION, 
-					true 
-				);
-				// Renamed JavaScript object to qragaData for wp_localize_script
-				wp_localize_script(
-					'qraga-admin-app', // Must match the script handle
-					'qragaData',
-					array(
-						'apiNonce' => $apiNonce,
-						'root'     => $root,
-						'baseUrl'  => $baseUrl,
-					)
-				);
-				// CSS is inlined into the main.js file by Vite build system
-				// No separate CSS file needs to be loaded
-			}
+			// Load built admin app
+			wp_enqueue_script(
+				'qraga-admin-app', 
+				QRAGA_URL . 'includes/admin/assets/js/main.js', 
+				array('wp-i18n'), 
+				QRAGA_VERSION, 
+				true 
+			);
+			// Pass data to JavaScript
+			wp_localize_script(
+				'qraga-admin-app',
+				'qragaData',
+				array(
+					'apiNonce' => $apiNonce,
+					'root'     => $root,
+					'baseUrl'  => $baseUrl,
+				)
+			);
 		}
 	}
 }
