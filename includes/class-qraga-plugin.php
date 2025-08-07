@@ -177,7 +177,9 @@ final class Qraga_Plugin
             'type'        => 'select',
             'choices'     => array(
                 'woocommerce_after_single_product_summary'  => __( 'After Product Summary', 'qraga' ),
-                'woocommerce_after_single_product'          => __( 'After Main Product Section', 'qraga' ),
+                'woocommerce_single_product_summary'        => __( 'Inside Product Summary', 'qraga' ),
+                'woocommerce_product_thumbnails'            => __( 'After Product Images', 'qraga' ),
+                'woocommerce_before_single_product_tabs'    => __( 'Before Product Tabs', 'qraga' ),
             ),
         ) );
     }
@@ -191,7 +193,9 @@ final class Qraga_Plugin
     public function sanitize_widget_position( $input ) {
         $allowed_positions = array(
             'woocommerce_after_single_product_summary',
-            'woocommerce_after_single_product',
+            'woocommerce_single_product_summary',
+            'woocommerce_product_thumbnails',
+            'woocommerce_before_single_product_tabs',
         );
         if ( in_array( $input, $allowed_positions ) ) {
             return $input;
@@ -218,7 +222,9 @@ final class Qraga_Plugin
         $position = get_option( 'qraga_widget_position', 'woocommerce_after_single_product_summary' );
         $position = $this->sanitize_widget_position( $position );
         
-        add_action( $position, array( $this, 'display_widget_from_hook' ), 15 );
+        // Use much higher priority (lower number) for summary to appear at very bottom
+        $priority = ( $position === 'woocommerce_single_product_summary' ) ? 99 : 15;
+        add_action( $position, array( $this, 'display_widget_from_hook' ), $priority );
     }
 
     /**
@@ -226,6 +232,8 @@ final class Qraga_Plugin
      * This method calls the static render_placeholder from Qraga_Widget_Display and echoes its output.
      */
     public function display_widget_from_hook() {
+        // Debug: Add a comment to see if the hook is being called
+        echo '<!-- Qraga Widget Hook Called -->';
         echo Qraga_Widget_Display::render_placeholder();
     }
 

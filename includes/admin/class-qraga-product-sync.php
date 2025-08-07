@@ -184,14 +184,16 @@ class Qraga_Product_Sync {
      */
     private function get_api_request_args( string $method = 'POST', string $content_type = 'application/json' ): array|string {
         $api_key = get_option( 'qraga_api_key', '' );
-        $url_base = get_option( 'qraga_endpoint_url', '' );
         $site_id = get_option( 'qraga_site_id', '' );
+        $region = get_option( 'qraga_region', '' );
+        $api_version = get_option( 'qraga_api_version', '' );
 
-        if ( empty( $url_base ) || empty( $site_id ) || empty( $api_key ) ) {
+        if ( empty( $site_id ) || empty( $api_key ) || empty( $region ) || empty( $api_version ) ) {
             $missing = [];
-            if ( empty( $url_base ) ) $missing[] = 'Endpoint URL';
             if ( empty( $site_id ) ) $missing[] = 'Site ID';
             if ( empty( $api_key ) ) $missing[] = 'API Key';
+            if ( empty( $region ) ) $missing[] = 'Region';
+            if ( empty( $api_version ) ) $missing[] = 'API Version';
             return 'External endpoint configuration is incomplete. Missing: ' . implode(', ', $missing) . '.';
         }
 
@@ -214,14 +216,21 @@ class Qraga_Product_Sync {
      * Adapted from QragaService URL construction for single products.
      */
     private function get_single_product_api_url(string $method, ?string $product_identifier = null): ?string {
-        $base_url = get_option('qraga_endpoint_url');
         $site_id = get_option('qraga_site_id');
+        $region = get_option('qraga_region', 'US');
+        $api_version = get_option('qraga_api_version', 'v1');
 
-        if (empty($base_url) || empty($site_id)) {
+        if (empty($site_id)) {
             return null;
         }
         
-        $url = trailingslashit($base_url) . 'v1/site/' . rawurlencode($site_id) . '/products';
+        // Use the compute_endpoint_url method from Qraga_Api class
+        $base_url = Qraga_Api::compute_endpoint_url($region, $api_version);
+        if (empty($base_url)) {
+            return null;
+        }
+        
+        $url = trailingslashit($base_url) . 'site/' . rawurlencode($site_id) . '/products';
 
         if (($method === 'PUT' || $method === 'DELETE')) {
             if (empty($product_identifier)) {
@@ -261,14 +270,21 @@ class Qraga_Product_Sync {
      * Constructs the API URL for bulk product operations.
      */
     private function get_bulk_products_api_url(): ?string {
-        $base_url = get_option('qraga_endpoint_url');
         $site_id = get_option('qraga_site_id');
+        $region = get_option('qraga_region', 'US');
+        $api_version = get_option('qraga_api_version', 'v1');
 
-        if (empty($base_url) || empty($site_id)) {
+        if (empty($site_id)) {
             return null;
         }
         
-        return trailingslashit($base_url) . 'v1/site/' . rawurlencode($site_id) . '/products/bulk'; 
+        // Use the compute_endpoint_url method from Qraga_Api class
+        $base_url = Qraga_Api::compute_endpoint_url($region, $api_version);
+        if (empty($base_url)) {
+            return null;
+        }
+        
+        return trailingslashit($base_url) . 'site/' . rawurlencode($site_id) . '/products/bulk'; 
     }
 
     /**
