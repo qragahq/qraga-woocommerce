@@ -191,10 +191,9 @@ const SettingsPage: React.FC = () => {
               />
             </CardContent>
             <CardFooter>
-              <Button type="submit" disabled={mutation.isLoading || !form.formState.isDirty || !form.formState.isValid}>
+              <Button type="submit" disabled={mutation.isLoading}>
                 {mutation.isLoading ? (
                   <>
-                    {/* Consider adding a Lucide icon like Loader2 here if you have lucide-react */}
                     <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" role="status" aria-label="loading"></span>
                     Saving...
                   </>

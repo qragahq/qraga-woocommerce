@@ -386,9 +386,10 @@ class Qraga_Api // Renamed class
 
         $site_id = get_option( 'qraga_site_id', '' );
         $api_key = get_option( 'qraga_api_key', '' );
-        $endpoint_url_base = get_option( 'qraga_endpoint_url', '' );
-        if ( empty( $site_id ) || empty( $api_key ) || empty( $endpoint_url_base ) ) {
-            return new WP_Error('qraga_missing_config_for_export', esc_html__( 'Site ID, API Key, and Endpoint URL must be configured in Settings before starting sync.', 'qraga' ), [ 'status' => 400 ] );
+        $region = get_option( 'qraga_region', '' );
+        $api_version = get_option( 'qraga_api_version', '' );
+        if ( empty( $site_id ) || empty( $api_key ) || empty( $region ) || empty( $api_version ) ) {
+            return new WP_Error('qraga_missing_config_for_export', esc_html__( 'Site ID, API Key, Region, and API Version must be configured in Settings before starting sync.', 'qraga' ), [ 'status' => 400 ] );
         }
 
         $query_args = [
