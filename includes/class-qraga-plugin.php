@@ -158,37 +158,41 @@ final class Qraga_Plugin
 
         // Try to attach our control into WooCommerce's existing Single Product/Product Page section when available
         $target_section_id = null;
-        $candidate_section_ids = array(
-            'woocommerce_product_page',
-            'woocommerce_single_product',
-            'woocommerce_single',
-            'woocommerce_product',
-        );
-
-        foreach ( $candidate_section_ids as $candidate_id ) {
-            if ( $wp_customize->get_section( $candidate_id ) ) {
-                $target_section_id = $candidate_id;
-                break;
+        
+        // Find the appropriate section for product pages
+        $all_sections = $wp_customize->sections();
+        foreach ( $all_sections as $section_id => $section ) {
+            if ( $section->panel === 'woocommerce' ) {
+                $title_lower = strtolower( $section->title );
+                $id_lower = strtolower( $section_id );
+                
+                // Prioritize sections with both "product" and "page" (single product pages)
+                if ( ( strpos( $title_lower, 'product' ) !== false && strpos( $title_lower, 'page' ) !== false ) ||
+                     ( strpos( $id_lower, 'product' ) !== false && strpos( $id_lower, 'page' ) !== false ) ) {
+                    $target_section_id = $section_id;
+                    break;
+                }
+            }
+        }
+        
+        // Fallback: if no product+page section found, find any product section
+        if ( ! $target_section_id ) {
+            foreach ( $all_sections as $section_id => $section ) {
+                if ( $section->panel === 'woocommerce' ) {
+                    $title_lower = strtolower( $section->title );
+                    $id_lower = strtolower( $section_id );
+                    
+                    if ( strpos( $title_lower, 'product' ) !== false || strpos( $id_lower, 'product' ) !== false ) {
+                        $target_section_id = $section_id;
+                        break;
+                    }
+                }
             }
         }
 
         if ( ! $target_section_id ) {
-            // Fallback: create our own section, preferably under the WooCommerce panel
-            $target_section_id = 'qraga_widget_section';
-            if ( $wp_customize->get_panel( 'woocommerce' ) ) {
-                $wp_customize->add_section( $target_section_id, array(
-                    'title'       => __( 'Qraga Widget', 'qraga' ),
-                    'priority'    => 160,
-                    'description' => __( 'Configure the display of the Qraga widget on product pages.', 'qraga' ),
-                    'panel'       => 'woocommerce',
-                ) );
-            } else {
-                $wp_customize->add_section( $target_section_id, array(
-                    'title'       => __( 'Qraga Widget', 'qraga' ),
-                    'priority'    => 160,
-                    'description' => __( 'Configure the display of the Qraga widget on product pages.', 'qraga' ),
-                ) );
-            }
+            // Fallback: use the WooCommerce panel directly
+            $target_section_id = 'woocommerce';
         }
 
         $wp_customize->add_setting( 'qraga_widget_position', array(
