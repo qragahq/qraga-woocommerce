@@ -209,7 +209,6 @@ final class Qraga_Plugin
                 'woocommerce_after_single_product_summary'  => __( 'After Product Summary', 'qraga' ),
                 'woocommerce_single_product_summary'        => __( 'Inside Product Summary', 'qraga' ),
                 'woocommerce_product_thumbnails'            => __( 'After Product Images', 'qraga' ),
-                'woocommerce_before_single_product_tabs'    => __( 'Before Product Tabs', 'qraga' ),
             ),
         ) );
     }
@@ -225,7 +224,6 @@ final class Qraga_Plugin
             'woocommerce_after_single_product_summary',
             'woocommerce_single_product_summary',
             'woocommerce_product_thumbnails',
-            'woocommerce_before_single_product_tabs',
         );
         if ( in_array( $input, $allowed_positions ) ) {
             return $input;
@@ -294,6 +292,13 @@ final class Qraga_Plugin
             return ''; 
         }
         
-        return Qraga_Widget_Display::render_placeholder( $attributes );
+        $wrapper_attributes = get_block_wrapper_attributes();
+        $widget_content = Qraga_Widget_Display::render_placeholder( $attributes );
+        
+        return sprintf(
+            '<div %s>%s</div>',
+            $wrapper_attributes,
+            $widget_content
+        );
     }
 } 

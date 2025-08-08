@@ -31,14 +31,26 @@ import './editor.scss';
  */
 export default function Edit() {
 	const blockProps = useBlockProps();
+
 	return (
 		<div { ...blockProps }>
-			<p>
-				{ __( 'Displays the Qraga product assistant widget on single product pages.', 'qraga-product-widget' ) }
-			</p>
-			<p>
-				<em>{ __( 'Ensure configuration is set at Qraga settings.', 'qraga-product-widget' ) }</em>
-			</p>
+			<div className="qraga-widget-skeleton">
+				<div className="qraga-widget-skeleton-header">
+					<div className="qraga-widget-skeleton-avatar"></div>
+					<div className="qraga-widget-skeleton-text"></div>
+				</div>
+				<div className="qraga-widget-skeleton-message">
+					<div className="qraga-widget-skeleton-line"></div>
+					<div className="qraga-widget-skeleton-line"></div>
+					<div className="qraga-widget-skeleton-line short"></div>
+				</div>
+				<div className="qraga-widget-skeleton-input">
+					<div className="qraga-widget-skeleton-placeholder"></div>
+				</div>
+				<div className="qraga-widget-skeleton-note">
+					{ __( 'Qraga widget will appear here on the frontend.', 'qraga-product-widget' ) }
+				</div>
+			</div>
 		</div>
 	);
 }
